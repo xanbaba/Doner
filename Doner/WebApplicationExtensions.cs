@@ -13,4 +13,9 @@ public static class WebApplicationExtensions
     {
         TFeature.Configure(app);
     }
+
+    public static void MapEndpoints<TEndpointMapper>(this IEndpointRouteBuilder builder) where TEndpointMapper : IEndpointMapper
+    {
+        TEndpointMapper.Map(builder);
+    }
 }

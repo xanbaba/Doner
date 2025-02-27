@@ -13,6 +13,4 @@ public class Workspace
     public User Owner { get; set; } = null!;
 
     public List<User> Invitees { get; set; } = null!;
-    
-    
 }

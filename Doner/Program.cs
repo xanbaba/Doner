@@ -1,6 +1,5 @@
 using Doner;
 using Doner.DataBase;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 

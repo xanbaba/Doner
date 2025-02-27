@@ -1,3 +1,4 @@
+using Doner;
 using Doner.DataBase;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,7 +11,7 @@ builder.Services.AddDbContextFactory<AppDbContext>();
 
 var app = builder.Build();
 
-
+app.MigrateDatabase<AppDbContext>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

@@ -22,6 +22,7 @@ public static class WebApplicationExtensions
 
     public static void MigrateDatabase<TDbContext>(this WebApplication app) where TDbContext: DbContext
     {
-        app.Services.CreateScope().ServiceProvider.GetRequiredService<TDbContext>().Database.Migrate();
+        using var scope = app.Services.CreateScope();
+        scope.ServiceProvider.GetRequiredService<IDbContextFactory<TDbContext>>().CreateDbContext().Database.Migrate();
     }
 }

@@ -1,4 +1,3 @@
-using Doner;
 using Doner.DataBase;
 
 var builder = WebApplication.CreateBuilder(args);

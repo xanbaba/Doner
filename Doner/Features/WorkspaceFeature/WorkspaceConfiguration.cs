@@ -1,4 +1,3 @@
-using Doner.Features.AuthFeature;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -23,5 +22,9 @@ public class WorkspaceConfiguration: IEntityTypeConfiguration<Workspace>
 
         builder.HasMany(e => e.Invitees)
             .WithMany();
+        
+        builder.HasMany(e => e.Reels)
+            .WithOne(e => e.Workspace)
+            .HasForeignKey(e => e.WorkspaceId);  
     }
 }

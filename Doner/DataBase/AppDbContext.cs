@@ -1,4 +1,5 @@
 using Doner.Features.AuthFeature;
+using Doner.Features.ReelsFeature;
 using Doner.Features.WorkspaceFeature;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ public class AppDbContext(IConfiguration configuration): DbContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Workspace> Workspaces { get; set; }
+    public DbSet<Reel> Reels { get; set; }
 
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

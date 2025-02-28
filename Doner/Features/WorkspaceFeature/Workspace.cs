@@ -1,4 +1,5 @@
 using Doner.Features.AuthFeature;
+using Doner.Features.ReelsFeature;
 
 namespace Doner.Features.WorkspaceFeature;
 
@@ -13,4 +14,6 @@ public class Workspace
     public User Owner { get; set; } = null!;
 
     public List<User> Invitees { get; set; } = null!;
+    
+    public List<Reel> Reels { get; set; } = null!;
 }

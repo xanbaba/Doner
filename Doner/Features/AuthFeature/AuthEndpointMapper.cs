@@ -9,9 +9,9 @@ public class AuthEndpointMapper : IEndpointMapper
 {
     public static void Map(IEndpointRouteBuilder builder)
     {
-        builder.MapGet("/sign-in", SignIn);
-        builder.MapGet("/sign-up", () => { });
-        builder.MapGet("/refresh", () => { });
+        builder.MapPost("/sign-in", SignIn);
+        builder.MapPost("/sign-up", () => { });
+        builder.MapPost("/refresh", () => { });
     }
     
     [SuppressMessage("ReSharper", "NotAccessedPositionalProperty.Local")]

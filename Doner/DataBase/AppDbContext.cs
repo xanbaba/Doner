@@ -6,6 +6,7 @@ namespace Doner.DataBase;
 public class AppDbContext(IConfiguration configuration): DbContext
 {
     public DbSet<User> Users { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

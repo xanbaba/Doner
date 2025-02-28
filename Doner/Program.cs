@@ -24,8 +24,4 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-app.MapPost("/test", (Test test) => test);
-
 app.Run();
-
-record Test(int A);

@@ -25,6 +25,8 @@ public class AuthFeature : IFeature
                 ValidateLifetime = true
             };
         });
+
+        builder.Services.AddAuthorization();
     }
 
     public static void Configure(WebApplication app)
@@ -32,5 +34,7 @@ public class AuthFeature : IFeature
         app.UseAuthentication();
         app.UseAuthorization();
         
+        var group = app.MapGroup("/api/v1");
+        group.MapEndpoints<AuthEndpointMapper>();
     }
 }

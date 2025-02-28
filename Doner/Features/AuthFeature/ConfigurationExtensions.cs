@@ -18,21 +18,53 @@ public static class ConfigurationExtensions
 
     public static string GetJwtSecret(this IConfiguration configuration)
     {
-        return GetJwtOption<string>(configuration, "Secret");
+        var secret = GetJwtOption<string>(configuration, "Secret");
+        if (string.IsNullOrWhiteSpace(secret))
+        {
+            throw new ApplicationException("Missing JWT secret. Try specify JWT options in appsettings.json.\n" +
+                                           "Path must be Jwt:<option>.\n" +
+                                           "Options are [Secret, Issuer, Audience, LifetimeMinutes]");
+        }
+
+        return secret;
     }
     
     public static string GetJwtAudience(this IConfiguration configuration)
     {
-        return GetJwtOption<string>(configuration, "Audience");
+        var audience = GetJwtOption<string>(configuration, "Audience");
+        if (string.IsNullOrWhiteSpace(audience))
+        {
+            throw new ApplicationException("Missing JWT audience. Try specify JWT options in appsettings.json.\n" +
+                                           "Path must be Jwt:<option>.\n" +
+                                           "Options are [Secret, Issuer, Audience, LifetimeMinutes]");
+        }
+
+        return audience;
     }
     
     public static string GetJwtIssuer(this IConfiguration configuration)
     {
-        return GetJwtOption<string>(configuration, "Secret");
+        var issuer = GetJwtOption<string>(configuration, "Issuer");
+        if (string.IsNullOrWhiteSpace(issuer))
+        {
+            throw new ApplicationException("Missing JWT issuer. Try specify JWT options in appsettings.json.\n" +
+                                           "Path must be Jwt:<option>.\n" +
+                                           "Options are [Secret, Issuer, Audience, LifetimeMinutes]");
+        }
+
+        return issuer;
     }
 
     public static int GetLifetimeMinutes(this IConfiguration configuration)
     {
-        return GetJwtOption<int>(configuration, "LifetimeMinutes");
+        var lifetime = GetJwtOption<int>(configuration, "LifetimeMinutes");
+        if (lifetime <= 0)
+        {
+            throw new ApplicationException("Missing JWT lifetime. Try specify JWT options in appsettings.json.\n" +
+                                           "Path must be Jwt:<option>.\n" +
+                                           "Options are [Secret, Issuer, Audience, LifetimeMinutes]");
+        }
+
+        return lifetime;
     }
 }

@@ -1,12 +1,11 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Doner.DataBase;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Doner.Features.AuthFeature;
 
-public class JwtTokenGenerator(IConfiguration configuration, AppDbContext dbContext)
+public class JwtTokenGenerator(IConfiguration configuration)
 {
     public string GenerateJwtToken(User user)
     {

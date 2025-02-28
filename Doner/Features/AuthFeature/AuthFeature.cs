@@ -32,5 +32,7 @@ public class AuthFeature : IFeature
         app.UseAuthentication();
         app.UseAuthorization();
         
+        var group = app.MapGroup("/api/v1");
+        group.MapEndpoints<AuthEndpointMapper>();
     }
 }

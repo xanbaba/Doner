@@ -1,7 +1,9 @@
+using LanguageExt.Common;
+
 namespace Doner.Features.AuthFeature;
 
 public interface IRefreshTokensManager
 {
-    public Task<string> RefreshTokenAsync(string refreshToken);
-    public Task<string> AssignRefreshTokenAsync(User user);
+    public Task<Result<string>> RefreshTokenAsync(string refreshToken);
+    public Task<Result<string>> AssignRefreshTokenAsync(User user);
 }

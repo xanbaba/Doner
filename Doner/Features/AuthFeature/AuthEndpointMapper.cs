@@ -44,5 +44,10 @@ public class AuthEndpointMapper : IEndpointMapper
         var accessToken = accessTokenGenerator.GenerateJwtToken(user);
         var refreshToken = await refreshTokensManager.AssignRefreshTokenAsync(user);
         return TypedResults.Ok(new TokensResponse(accessToken, refreshToken));
+        return (await refreshTokensManager.AssignRefreshTokenAsync(user))
+            .Match<Results<UnauthorizedHttpResult, Ok<TokensResponse>>>(
+                refreshToken => TypedResults.Ok(new TokensResponse(accessToken, refreshToken)),
+                _ => TypedResults.Unauthorized());
+    }
     }
 }

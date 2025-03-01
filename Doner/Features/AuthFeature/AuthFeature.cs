@@ -4,7 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Doner.Features.AuthFeature;
 
-public class AuthFeature : IFeature
+public abstract class AuthFeature : IFeature
 {
     public static void Build(WebApplicationBuilder builder)
     {
@@ -27,6 +27,7 @@ public class AuthFeature : IFeature
         });
 
         builder.Services.AddAuthorization();
+        builder.Services.AddScoped<IRefreshTokensManager, RefreshTokensManager>();
     }
 
     public static void Configure(WebApplication app)

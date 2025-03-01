@@ -1,11 +1,14 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Doner.DataBase;
+using LanguageExt.Common;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Doner.Features.AuthFeature;
 
-public class JwtTokenGenerator(IConfiguration configuration)
+public class JwtTokenGenerator(IConfiguration configuration, AppDbContext dbContext)
 {
     public string GenerateJwtToken(User user)
     {
@@ -25,17 +28,17 @@ public class JwtTokenGenerator(IConfiguration configuration)
         return token;
     }
 
-    /*public string GenerateJwtToken(string refreshToken)
+    public Result<string> GenerateJwtToken(string refreshToken)
     {
         var tokenEntity = dbContext.RefreshTokens.Include(x => x.User).FirstOrDefault(x => x.Token == refreshToken);
 
         if (tokenEntity is null)
         {
-            throw new RefreshTokenNotFoundException();
+            return new Result<string>(new RefreshTokenNotFoundException());
         }
         
         var user = tokenEntity.User;
         
         return GenerateJwtToken(user);
-    }*/
+    }
 }

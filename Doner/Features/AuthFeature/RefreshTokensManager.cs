@@ -3,10 +3,9 @@ using LanguageExt.Common;
 
 namespace Doner.Features.AuthFeature;
 
-public class RefreshTokensManager(AppDbContext dbContext) : IRefreshTokensManager
+public class RefreshTokensManager(AppDbContext dbContext, IConfiguration configuration) : IRefreshTokensManager
 {
-    // ToDo: Move this to appsettings.json
-    private const int RefreshTokenLifetimeDays = 30;
+    private readonly int _refreshTokenLifetimeDays = configuration.GetValue<int>("RefreshTokenLifetimeDays");
     
     public async Task<Result<string>> RefreshTokenAsync(string refreshToken)
     {
@@ -24,7 +23,7 @@ public class RefreshTokensManager(AppDbContext dbContext) : IRefreshTokensManage
         var newRefreshToken = RefreshTokenGenerator.GenerateRefreshToken();
         
         existingRefreshToken.Token = newRefreshToken;
-        existingRefreshToken.UtcExpiresAt = DateTime.UtcNow.AddDays(RefreshTokenLifetimeDays);
+        existingRefreshToken.UtcExpiresAt = DateTime.UtcNow.AddDays(_refreshTokenLifetimeDays);
         await dbContext.SaveChangesAsync();
         return newRefreshToken;
     }
@@ -35,7 +34,7 @@ public class RefreshTokensManager(AppDbContext dbContext) : IRefreshTokensManage
         dbContext.RefreshTokens.Add(new RefreshToken
         {
             UserId = user.Id,
-            UtcExpiresAt = DateTime.UtcNow.AddDays(RefreshTokenLifetimeDays),
+            UtcExpiresAt = DateTime.UtcNow.AddDays(_refreshTokenLifetimeDays),
             Token = token
         });
         

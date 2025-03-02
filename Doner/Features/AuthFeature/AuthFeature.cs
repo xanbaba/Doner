@@ -28,6 +28,7 @@ public abstract class AuthFeature : IFeature
 
         builder.Services.AddAuthorization();
         builder.Services.AddScoped<IRefreshTokensManager, RefreshTokensManager>();
+        builder.Services.AddScoped<JwtTokenGenerator>();
     }
 
     public static void Configure(WebApplication app)

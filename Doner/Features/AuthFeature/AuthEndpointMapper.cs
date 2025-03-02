@@ -36,7 +36,7 @@ public class AuthEndpointMapper : IEndpointMapper
 
         var hashedPassword = PasswordHasher.HashPassword(request.Password, user.PasswordSalt);
 
-        if (user.PasswordHash != hashedPassword)
+        if (!PasswordHasher.ConstantTimeCompare(hashedPassword, user.PasswordHash))
         {
             return TypedResults.Unauthorized();
         }

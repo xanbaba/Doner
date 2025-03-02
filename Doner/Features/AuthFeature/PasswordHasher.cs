@@ -23,4 +23,18 @@ public static class PasswordHasher
         var hashedBytes = sha256.ComputeHash(combined);
         return hashedBytes;
     }
+
+    public static bool ConstantTimeCompare(byte[] hash1, byte[] hash2)
+    {
+        if (hash1.Length != hash2.Length) return false; // Early return if lengths differ
+
+        int result = 0; // Accumulator variable
+        for (int i = 0; i < hash1.Length; i++)
+        {
+            result |= hash1[i] ^ hash2[i]; // XOR each byte and accumulate result
+        }
+
+        return result == 0; // If result is 0, hashes are identical
+    }
+
 }

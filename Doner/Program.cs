@@ -1,3 +1,4 @@
+using Doner;
 using Doner.DataBase;
 using Doner.Features.AuthFeature;
 

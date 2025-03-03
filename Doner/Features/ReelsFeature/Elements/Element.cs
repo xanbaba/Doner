@@ -1,6 +1,7 @@
-﻿namespace Doner.Features.ReelsFeature.Elements;
+﻿using System.Text.Json.Serialization;
 
-public abstract class Element(string type)
-{
-    public string Type { get; set; } = type;
-}
+namespace Doner.Features.ReelsFeature.Elements;
+
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
+[JsonDerivedType(typeof(Checkbox), typeDiscriminator: "checkbox")]
+public abstract class Element;

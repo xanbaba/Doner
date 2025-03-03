@@ -11,6 +11,6 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
         builder.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
         builder.Property(x => x.UserId).IsRequired();
         builder.Property(x => x.UtcExpiresAt).IsRequired();
-        builder.Property(x => x.Token).HasMaxLength(32).IsRequired();
+        builder.Property(x => x.Token).HasMaxLength(32).IsRequired().IsUnicode(false);
     }
 }

@@ -3,5 +3,5 @@
 public class Checkbox : Element
 {
     public bool IsChecked { get; set; }
-    public string Text { get; set; } = string.Empty;
+    public string Header { get; set; } = string.Empty;
 }

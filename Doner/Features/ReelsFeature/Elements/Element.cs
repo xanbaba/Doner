@@ -1,4 +1,4 @@
-﻿namespace Doner.Features.ReelsFeature;
+﻿namespace Doner.Features.ReelsFeature.Elements;
 
 public abstract class Element(string type)
 {

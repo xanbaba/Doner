@@ -2,11 +2,13 @@
 using System.Security.Claims;
 using System.Text;
 using Doner.DataBase;
+using Doner.Features.AuthFeature.Entities;
+using Doner.Features.AuthFeature.Exceptions;
 using LanguageExt.Common;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Doner.Features.AuthFeature;
+namespace Doner.Features.AuthFeature.Services;
 
 public class JwtTokenGenerator(IConfiguration configuration, AppDbContext dbContext)
 {

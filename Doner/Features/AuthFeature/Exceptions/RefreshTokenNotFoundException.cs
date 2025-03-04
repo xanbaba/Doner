@@ -1,3 +1,3 @@
-namespace Doner.Features.AuthFeature;
+namespace Doner.Features.AuthFeature.Exceptions;
 
 public class RefreshTokenNotFoundException : Exception;

@@ -1,4 +1,4 @@
-﻿namespace Doner.Features.AuthFeature;
+﻿namespace Doner.Features.AuthFeature.Entities;
 
 public class RefreshToken
 {

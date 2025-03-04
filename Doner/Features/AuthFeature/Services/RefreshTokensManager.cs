@@ -1,7 +1,9 @@
 ﻿using Doner.DataBase;
+using Doner.Features.AuthFeature.Entities;
+using Doner.Features.AuthFeature.Exceptions;
 using LanguageExt.Common;
 
-namespace Doner.Features.AuthFeature;
+namespace Doner.Features.AuthFeature.Services;
 
 public class RefreshTokensManager(AppDbContext dbContext, IConfiguration configuration) : IRefreshTokensManager
 {

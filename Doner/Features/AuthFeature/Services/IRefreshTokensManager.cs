@@ -1,6 +1,7 @@
+using Doner.Features.AuthFeature.Entities;
 using LanguageExt.Common;
 
-namespace Doner.Features.AuthFeature;
+namespace Doner.Features.AuthFeature.Services;
 
 public interface IRefreshTokensManager
 {

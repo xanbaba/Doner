@@ -1,6 +1,6 @@
 ﻿using System.Security.Cryptography;
 
-namespace Doner.Features.AuthFeature;
+namespace Doner.Features.AuthFeature.Services;
 
 public static class RefreshTokenGenerator
 {

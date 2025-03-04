@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Doner.Features.AuthFeature;
+namespace Doner.Features.AuthFeature.Entities;
 
 public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
 {

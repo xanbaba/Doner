@@ -1,4 +1,5 @@
 using Doner.Features.AuthFeature;
+using Doner.Features.AuthFeature.Entities;
 using Doner.Features.ReelsFeature;
 
 namespace Doner.Features.WorkspaceFeature;

@@ -1,4 +1,5 @@
 using Doner.Features.AuthFeature;
+using Doner.Features.AuthFeature.Entities;
 using Doner.Features.ReelsFeature;
 using Doner.Features.WorkspaceFeature;
 using Microsoft.EntityFrameworkCore;

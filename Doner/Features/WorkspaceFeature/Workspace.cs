@@ -1,4 +1,3 @@
-using Doner.Features.AuthFeature;
 using Doner.Features.AuthFeature.Entities;
 using Doner.Features.ReelsFeature;
 
@@ -14,7 +13,7 @@ public class Workspace
     public Guid OwnerId { get; set; }
     public User Owner { get; set; } = null!;
 
-    public List<User> Invitees { get; set; } = null!;
+    public List<WorkspaceInvite> Invitees { get; set; } = null!;
     
     public List<Reel> Reels { get; set; } = null!;
 }

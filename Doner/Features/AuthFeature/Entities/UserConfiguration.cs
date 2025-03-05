@@ -33,5 +33,11 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         // Email
         builder.Property(x => x.Email).HasMaxLength(255).IsUnicode();
         builder.HasIndex(x => x.Email).IsUnique();
+        
+        // InvitedWorkspaces
+        builder.HasMany(x => x.InvitedWorkspaces)
+            .WithOne(i => i.User)
+            .HasForeignKey(i => i.UserId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

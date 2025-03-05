@@ -1,0 +1,29 @@
+﻿services:
+  app:
+    build:
+      context: .
+      dockerfile: Doner/Dockerfile
+    ports:
+      - "5000:8080"
+      - "5001:8081"
+    depends_on:
+      - mssql
+    environment:
+      - ConnectionStrings__DefaultConnection=Server=mssql;Database=Doner;User Id=sa;Password=${DB_PASSWORD};TrustServerCertificate=true;
+    env_file:
+      - .env
+
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    ports:
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: "${DB_PASSWORD}"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - mssql-data:/var/opt/mssql
+    env_file:
+      - .env
+
+volumes:
+  mssql-data:

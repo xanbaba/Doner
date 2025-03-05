@@ -1,4 +1,3 @@
-using Doner.Features.AuthFeature;
 using Doner.Features.AuthFeature.Entities;
 using Doner.Features.ReelsFeature;
 using Doner.Features.WorkspaceFeature;
@@ -16,7 +15,8 @@ public class AppDbContext(IConfiguration configuration): DbContext
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseSqlite(configuration.GetConnectionString("SQLite"));
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        optionsBuilder.UseSqlServer(connectionString);
         optionsBuilder.EnableSensitiveDataLogging();
     }
 

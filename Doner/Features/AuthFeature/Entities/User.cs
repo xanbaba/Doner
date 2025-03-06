@@ -1,4 +1,6 @@
-﻿namespace Doner.Features.AuthFeature.Entities;
+﻿using Doner.Features.WorkspaceFeature;
+
+namespace Doner.Features.AuthFeature.Entities;
 
 public class User
 {
@@ -10,4 +12,5 @@ public class User
     public string? Email { get; set; }
     public byte[] PasswordHash { get; set; } = null!;
     public byte[] PasswordSalt { get; set; } = null!;
+    public List<WorkspaceInvite> InvitedWorkspaces { get; set; } = null!;
 }

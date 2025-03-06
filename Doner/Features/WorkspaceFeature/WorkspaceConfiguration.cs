@@ -18,13 +18,16 @@ public class WorkspaceConfiguration: IEntityTypeConfiguration<Workspace>
 
         builder.HasOne(e => e.Owner)
             .WithMany()
-            .HasForeignKey(e => e.OwnerId);
+            .HasForeignKey(e => e.OwnerId)
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasMany(e => e.Invitees)
-            .WithMany();
+            .WithOne(e => e.Workspace)
+            .OnDelete(DeleteBehavior.Cascade);
         
         builder.HasMany(e => e.Reels)
             .WithOne(e => e.Workspace)
-            .HasForeignKey(e => e.WorkspaceId);  
+            .HasForeignKey(e => e.WorkspaceId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

@@ -1,4 +1,4 @@
-namespace Doner.Features.ReelsFeature;
+namespace Doner.Features.SprintFeature;
 
 public enum Status
 {

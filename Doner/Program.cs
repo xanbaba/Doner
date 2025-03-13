@@ -1,6 +1,7 @@
 using Doner;
 using Doner.DataBase;
 using Doner.Features.AuthFeature;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,13 +13,14 @@ builder.Configuration.AddEnvironmentVariables();
 builder.Services.AddOpenApi();
 builder.AddFeature<AuthFeature>();
 builder.Services.AddDbContextFactory<AppDbContext>();
+builder.Services.AddSingleton<IMongoDatabase>(_ => new MongoClient(builder.Configuration.GetConnectionString("MongoDb")).GetDatabase("Doner"));
 
 var app = builder.Build();
 
-app.MigrateDatabase<AppDbContext>();
+// app.MigrateDatabase<AppDbContext>();
 
-// app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureDeleted();
-// app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
+app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureDeleted();
+app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

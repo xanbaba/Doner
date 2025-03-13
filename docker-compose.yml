@@ -10,6 +10,21 @@
       - mssql-data:/var/opt/mssql
     env_file:
       - .env
+  
+  mongo:
+    image: mongo:latest
+    container_name: mongo-db
+    env_file:
+      - .env
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_PASSWORD}"
+    restart: unless-stopped
 
 volumes:
   mssql-data:
+  mongo-data:

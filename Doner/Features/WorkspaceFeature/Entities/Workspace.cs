@@ -1,7 +1,7 @@
 using Doner.Features.AuthFeature.Entities;
 using Doner.Features.ReelsFeature;
 
-namespace Doner.Features.WorkspaceFeature;
+namespace Doner.Features.WorkspaceFeature.Entities;
 
 public class Workspace
 {

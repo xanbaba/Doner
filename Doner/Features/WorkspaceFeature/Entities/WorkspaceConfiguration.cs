@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace Doner.Features.WorkspaceFeature;
+namespace Doner.Features.WorkspaceFeature.Entities;
 
 public class WorkspaceConfiguration: IEntityTypeConfiguration<Workspace>
 {

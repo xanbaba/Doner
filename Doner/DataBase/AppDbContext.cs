@@ -1,6 +1,7 @@
 using Doner.Features.AuthFeature.Entities;
 using Doner.Features.ReelsFeature;
 using Doner.Features.WorkspaceFeature;
+using Doner.Features.WorkspaceFeature.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace Doner.DataBase;

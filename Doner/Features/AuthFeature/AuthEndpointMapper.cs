@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Doner.Features.AuthFeature;
 
-public class AuthEndpointMapper : IEndpointMapper
+public abstract class AuthEndpointMapper : IEndpointMapper
 {
     public static void Map(IEndpointRouteBuilder builder)
     {

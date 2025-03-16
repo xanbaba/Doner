@@ -1,5 +1,3 @@
-using System.Text.Json;
-using Doner.DataBase;
 using Doner.Features.WorkspaceFeature.Entities;
 using Doner.Features.WorkspaceFeature.Repository;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -7,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Doner.Features.WorkspaceFeature;
 
-public class WorkspaceEndpointMapper(): IEndpointMapper
+public abstract class WorkspaceEndpointMapper: IEndpointMapper
 {
     public static void Map(IEndpointRouteBuilder builder)
     {

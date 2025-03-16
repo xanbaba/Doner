@@ -1,7 +1,6 @@
 using Doner.DataBase;
 using Doner.Features.WorkspaceFeature.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Scaffolding;
 
 namespace Doner.Features.WorkspaceFeature.Repository;
 

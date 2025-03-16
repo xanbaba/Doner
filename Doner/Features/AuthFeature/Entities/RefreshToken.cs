@@ -2,9 +2,9 @@
 
 public class RefreshToken
 {
-    public int Id { get; set; }
-    public Guid UserId { get; set; }
-    public User User { get; set; } = null!;
+    public int Id { get; init; }
+    public Guid UserId { get; init; }
+    public User User { get; init; } = null!;
     public string Token { get; set; } = null!;
     public DateTime UtcExpiresAt { get; set; }
 }

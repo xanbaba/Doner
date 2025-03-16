@@ -1,6 +1,4 @@
 using Doner.Features.AuthFeature.Entities;
-using Doner.Features.ReelsFeature;
-using Doner.Features.WorkspaceFeature;
 using Doner.Features.WorkspaceFeature.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +8,6 @@ public class AppDbContext(IConfiguration configuration) : DbContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Workspace> Workspaces { get; set; }
-    public DbSet<Reel> Reels { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<WorkspaceInvite> WorkspaceInvites { get; set; }
 

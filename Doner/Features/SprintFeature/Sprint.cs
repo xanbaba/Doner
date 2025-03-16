@@ -1,5 +1,3 @@
-using Doner.Features.ReelsFeature;
-
 namespace Doner.Features.SprintFeature;
 
 public class Sprint

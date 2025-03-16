@@ -1,19 +1,16 @@
 using Doner.Features.AuthFeature.Entities;
-using Doner.Features.ReelsFeature;
 
 namespace Doner.Features.WorkspaceFeature.Entities;
 
 public class Workspace
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; }
     
     public string Name { get; set; } = null!;
     public string? Description { get; set; }
     
-    public Guid OwnerId { get; set; }
-    public User Owner { get; set; } = null!;
+    public Guid OwnerId { get; init; }
+    public User Owner { get; init; } = null!;
 
-    public List<WorkspaceInvite> Invitees { get; set; } = null!;
-    
-    public List<Reel> Reels { get; set; } = null!;
+    public List<WorkspaceInvite> Invitees { get; init; } = null!;
 }

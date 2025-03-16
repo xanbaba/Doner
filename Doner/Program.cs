@@ -1,9 +1,6 @@
 using Doner;
 using Doner.DataBase;
 using Doner.Features.AuthFeature;
-using MongoDB.Driver;
-using Doner.Features.WorkspaceFeature;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,10 +15,10 @@ builder.Services.AddDbContextFactory<AppDbContext>();
 
 var app = builder.Build();
 
-// app.MigrateDatabase<AppDbContext>();
+app.MigrateDatabase<AppDbContext>();
 
-app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureDeleted();
-app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
+// app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureDeleted();
+// app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

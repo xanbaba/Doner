@@ -24,10 +24,5 @@ public class WorkspaceConfiguration: IEntityTypeConfiguration<Workspace>
         builder.HasMany(e => e.Invitees)
             .WithOne(e => e.Workspace)
             .OnDelete(DeleteBehavior.Cascade);
-        
-        builder.HasMany(e => e.Reels)
-            .WithOne(e => e.Workspace)
-            .HasForeignKey(e => e.WorkspaceId)
-            .OnDelete(DeleteBehavior.Cascade);
     }
 }

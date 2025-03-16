@@ -2,8 +2,6 @@
 
 public enum SearchOption
 {
-    None,
-    
     /// <summary>
     /// indicates that search query should fully match.
     /// </summary>

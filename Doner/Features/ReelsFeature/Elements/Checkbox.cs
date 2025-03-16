@@ -1,6 +1,9 @@
-﻿namespace Doner.Features.ReelsFeature.Elements;
+﻿using MongoDB.Bson.Serialization.Attributes;
 
-public class Checkbox : Element
+namespace Doner.Features.ReelsFeature.Elements;
+
+[BsonDiscriminator(nameof(Checkbox))]
+public class Checkbox : ReelElement
 {
     public bool IsChecked { get; set; }
     public string Header { get; set; } = string.Empty;

@@ -6,4 +6,5 @@ namespace Doner.Features.ReelsFeature.Elements;
 [JsonDerivedType(typeof(Checkbox), typeDiscriminator: "checkbox")]
 [JsonDerivedType(typeof(PlainText), typeDiscriminator: "plainText")]
 [JsonDerivedType(typeof(Dropdown), typeDiscriminator: "dropdown")]
+[JsonDerivedType(typeof(Picture), typeDiscriminator: "picture")]
 public abstract class Element;

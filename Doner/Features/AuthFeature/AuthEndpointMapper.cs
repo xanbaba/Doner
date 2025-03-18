@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using Doner.DataBase;
+using Doner.Features.AuthFeature.Entities;
 using Doner.Features.AuthFeature.Services;
+using FluentValidation;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +13,7 @@ public abstract class AuthEndpointMapper : IEndpointMapper
     public static void Map(IEndpointRouteBuilder builder)
     {
         builder.MapPost("/sign-in", SignIn);
-        builder.MapPost("/sign-up", () => { });
+        builder.MapPost("/sign-up", SignUp);
         builder.MapPost("/refresh", Refresh);
     }
 
@@ -22,6 +24,47 @@ public abstract class AuthEndpointMapper : IEndpointMapper
         string Login,
         string? Email,
         string Password);
+
+    private static async Task<Results<Ok, BadRequest<string>>> SignUp
+    (
+        [FromBody] SignUpRequest request,
+        [FromServices] AppDbContext dbContext,
+        [FromServices] IValidator<SignUpRequest> signUpRequestValidator
+    )
+    {
+        await signUpRequestValidator.ValidateAndThrowAsync(request);
+
+        var passwordHash = PasswordHasher.HashPassword(request.Password, out var salt);
+
+        if (dbContext.Users.Any(u => u.Login == request.Login))
+        {
+            return TypedResults.BadRequest("This login is already taken");
+        }
+
+        if (request.Email is not null && dbContext.Users.Any(u => u.Email == request.Email))
+        {
+            return TypedResults.BadRequest("This email is already taken");
+        }
+
+        var user = new User
+        {
+            Id = Guid.CreateVersion7(),
+            FirstName = request.FirstName,
+            MiddleName = request.MiddleName,
+            LastName = request.LastName,
+            Email = request.Email,
+            Login = request.Login,
+            PasswordSalt = salt,
+            PasswordHash = passwordHash
+        };
+
+        dbContext.Users.Add(user);
+
+        await dbContext.SaveChangesAsync();
+
+        return TypedResults.Ok();
+    }
+
     [SuppressMessage("ReSharper", "NotAccessedPositionalProperty.Local")]
     private record TokensResponse(string AccessToken, string RefreshToken);
 

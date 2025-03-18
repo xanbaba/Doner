@@ -15,6 +15,13 @@ public abstract class AuthEndpointMapper : IEndpointMapper
         builder.MapPost("/refresh", Refresh);
     }
 
+    public record SignUpRequest(
+        string FirstName,
+        string? MiddleName,
+        string? LastName,
+        string Login,
+        string? Email,
+        string Password);
     [SuppressMessage("ReSharper", "NotAccessedPositionalProperty.Local")]
     private record TokensResponse(string AccessToken, string RefreshToken);
 

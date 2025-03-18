@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Doner.Tests", "Doner.Tests\Doner.Tests.csproj", "{F1A6A73E-C4CA-4D57-B151-883AF1AAD962}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts", "Contracts\Contracts.csproj", "{0CDD24CF-8962-4DD0-96C2-D7DF0752C739}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{F1A6A73E-C4CA-4D57-B151-883AF1AAD962}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F1A6A73E-C4CA-4D57-B151-883AF1AAD962}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F1A6A73E-C4CA-4D57-B151-883AF1AAD962}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0CDD24CF-8962-4DD0-96C2-D7DF0752C739}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0CDD24CF-8962-4DD0-96C2-D7DF0752C739}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0CDD24CF-8962-4DD0-96C2-D7DF0752C739}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0CDD24CF-8962-4DD0-96C2-D7DF0752C739}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

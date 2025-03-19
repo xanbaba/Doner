@@ -9,6 +9,7 @@
 
     <ItemGroup>
         <PackageReference Include="DotNetEnv" Version="3.1.1" />
+        <PackageReference Include="FluentValidation" Version="11.11.0" />
         <PackageReference Include="LanguageExt.Core" Version="4.4.9" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0"/>
@@ -16,6 +17,10 @@
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.2" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.2" />
         <PackageReference Include="MongoDB.Driver" Version="3.2.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Doner.Contracts\Doner.Contracts.csproj" />
     </ItemGroup>
 
 </Project>

@@ -7,13 +7,13 @@ namespace Doner.Features.ReelsFeature;
 public class Reel
 {
     [BsonId]
-    [BsonRepresentation(BsonType.Binary)]
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid Id { get; set; }
     
     public string Name { get; set; } = null!;
     public string Description { get; set; } = null!;
     
-    [BsonRepresentation(BsonType.Binary)]
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid WorkspaceId { get; set; }
     public IEnumerable<ReelElement> ReelElements { get; set; } = [];
 }

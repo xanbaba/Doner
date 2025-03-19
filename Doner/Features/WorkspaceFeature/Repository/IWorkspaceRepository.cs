@@ -4,7 +4,7 @@ namespace Doner.Features.WorkspaceFeature.Repository;
 
 public interface IWorkspaceRepository
 {
-    Task<IEnumerable<Workspace>> GetAsync();
+    Task<IEnumerable<Workspace>> GetByOwnerAsync(Guid ownerId);
     Task<Workspace?> GetAsync(Guid id);
 
     Task<Guid> AddAsync(Workspace workspace);
@@ -14,4 +14,10 @@ public interface IWorkspaceRepository
     
     Task RemoveAsync(Guid id);
     Task RemoveAsync(Workspace workspace);
+
+    Task<bool> Exists(Guid workspaceId);
+    
+    Task<bool> Exists(Guid ownerId, string workspaceName);
+
+
 }

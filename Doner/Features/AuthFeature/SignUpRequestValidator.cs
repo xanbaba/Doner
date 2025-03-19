@@ -1,8 +1,9 @@
-﻿using FluentValidation;
+﻿using Contracts.V1.Requests;
+using FluentValidation;
 
 namespace Doner.Features.AuthFeature;
 
-public class SignUpRequestValidator : AbstractValidator<AuthEndpointMapper.SignUpRequest>
+public class SignUpRequestValidator : AbstractValidator<SignUpRequest>
 {
     public SignUpRequestValidator()
     {

@@ -7,9 +7,4 @@
         <RootNamespace>Contracts</RootNamespace>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Folder Include="V1\Requests\" />
-      <Folder Include="V1\Responses\" />
-    </ItemGroup>
-
 </Project>

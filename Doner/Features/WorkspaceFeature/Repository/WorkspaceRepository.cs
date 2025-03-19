@@ -4,13 +4,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Doner.Features.WorkspaceFeature.Repository;
 
-public class WorkspaceRepositoryLocal(IDbContextFactory<AppDbContext> dbContextFactory): WorkspaceRepositoryBase
+public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactory): WorkspaceRepositoryBase
 {
-    public override async Task<IEnumerable<Workspace>> GetAsync()
+    public override async Task<IEnumerable<Workspace>> GetByOwnerAsync(Guid ownerId)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
-
-        return context.Workspaces;
+        
+        return context.Workspaces
+            .Where(w => w.OwnerId == ownerId);
     }
 
     public override async Task<Workspace?> GetAsync(Guid id)
@@ -53,7 +54,20 @@ public class WorkspaceRepositoryLocal(IDbContextFactory<AppDbContext> dbContextF
         context.Workspaces.Remove(new Workspace { Id = id });
         
         await context.SaveChangesAsync();
+    }
+    
+    public override async Task<bool> Exists(Guid workspaceId)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+
+        return context.Workspaces
+            .Any(w => w.Id == workspaceId);
+    }
+    
+    public override async Task<bool> Exists(Guid ownerId, string workspaceName)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
         
-        
+        return context.Workspaces.Any(w => w.OwnerId == ownerId && w.Name == workspaceName);
     }
 }

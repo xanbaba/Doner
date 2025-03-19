@@ -1,6 +1,7 @@
 using Doner;
 using Doner.DataBase;
 using Doner.Features.AuthFeature;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +12,11 @@ builder.Configuration.AddEnvironmentVariables();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.AddFeature<AuthFeature>();
-builder.Services.AddDbContextFactory<AppDbContext>();
+builder.Services.AddDbContextFactory<AppDbContext>(optionsBuilder =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    optionsBuilder.UseSqlServer(connectionString);
+});
 
 var app = builder.Build();
 

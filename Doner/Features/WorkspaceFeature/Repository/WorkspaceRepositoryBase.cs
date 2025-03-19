@@ -4,7 +4,7 @@ namespace Doner.Features.WorkspaceFeature.Repository;
 
 public abstract class WorkspaceRepositoryBase: IWorkspaceRepository
 {
-    public abstract Task<IEnumerable<Workspace>> GetAsync();
+    public abstract Task<IEnumerable<Workspace>> GetByOwnerAsync(Guid ownerId);
 
     public abstract Task<Workspace?> GetAsync(Guid id);
 
@@ -22,4 +22,8 @@ public abstract class WorkspaceRepositoryBase: IWorkspaceRepository
     {
         return RemoveAsync(workspace.Id);
     }
+
+    public abstract Task<bool> Exists(Guid workspaceId);
+
+    public abstract Task<bool> Exists(Guid ownerId, string workspaceName);
 }

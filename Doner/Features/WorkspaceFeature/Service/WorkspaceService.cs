@@ -2,7 +2,7 @@ using System.Runtime.InteropServices.ComTypes;
 using Doner.Features.WorkspaceFeature.Entities;
 using Doner.Features.WorkspaceFeature.Exceptions;
 using Doner.Features.WorkspaceFeature.Repository;
-using Doner.Features.WorkspaceFeature.Service.Localizer;
+using Doner.Localizer;
 using LanguageExt;
 using LanguageExt.Common;
 using Microsoft.Extensions.Localization;

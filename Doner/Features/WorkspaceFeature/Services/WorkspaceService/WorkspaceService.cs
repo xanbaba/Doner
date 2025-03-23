@@ -61,6 +61,11 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository, IStringL
             return new Result<Unit>(new PermissionDeniedException(localizer["PermissionDenied"].Value));
         }
         
+        if (await workspaceRepository.Exists(workspace.OwnerId, workspace.Name))
+        {
+            return new Result<Unit>(new WorkspaceAlreadyExistsException(localizer["WorkspaceAlreadyExists"].Value));
+        }
+        
         await workspaceRepository.UpdateAsync(workspace);
         
         return new Result<Unit>();

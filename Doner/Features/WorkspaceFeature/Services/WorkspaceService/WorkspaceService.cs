@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices.ComTypes;
 using Doner.Features.WorkspaceFeature.Entities;
 using Doner.Features.WorkspaceFeature.Exceptions;
 using Doner.Features.WorkspaceFeature.Repository;
@@ -6,9 +5,8 @@ using Doner.Localizer;
 using LanguageExt;
 using LanguageExt.Common;
 using Microsoft.Extensions.Localization;
-using Sprache;
 
-namespace Doner.Features.WorkspaceFeature.Service;
+namespace Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 
 public class WorkspaceService(IWorkspaceRepository workspaceRepository, IStringLocalizer<Messages> localizer): WorkspaceServiceBase
 {

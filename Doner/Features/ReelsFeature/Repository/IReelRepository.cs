@@ -1,4 +1,6 @@
-﻿namespace Doner.Features.ReelsFeature.Services;
+﻿using SearchOption = Contracts.V1.SearchOption;
+
+namespace Doner.Features.ReelsFeature.Repository;
 
 public interface IReelRepository
 {

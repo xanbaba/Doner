@@ -1,9 +1,9 @@
 ﻿using Doner.Features.ReelsFeature;
-using Doner.Features.ReelsFeature.Services;
+using Doner.Features.ReelsFeature.Repository;
 using FluentAssertions;
 using Mongo2Go;
 using MongoDB.Driver;
-using SearchOption = Doner.Features.ReelsFeature.Services.SearchOption;
+using SearchOption = Contracts.V1.SearchOption;
 
 namespace Doner.Tests;
 

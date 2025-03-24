@@ -1,8 +1,9 @@
 ﻿using System.Text.RegularExpressions;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using SearchOption = Contracts.V1.SearchOption;
 
-namespace Doner.Features.ReelsFeature.Services;
+namespace Doner.Features.ReelsFeature.Repository;
 
 public class ReelRepository : IReelRepository
 {

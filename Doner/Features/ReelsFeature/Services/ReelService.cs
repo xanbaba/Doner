@@ -16,7 +16,7 @@ public class ReelService : IReelService
     (
         IReelRepository reelRepository,
         IValidator<Reel> reelValidator,
-        WorkspaceService workspaceService
+        IWorkspaceService workspaceService
     )
     {
         _reelRepository = reelRepository;

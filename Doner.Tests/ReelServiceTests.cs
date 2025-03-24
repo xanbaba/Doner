@@ -146,6 +146,50 @@ public class ReelServiceTests
 
         result.Should().BeEquivalentTo(reels);
     }
+    
+    [Fact]
+    public async Task AddAsync_ShouldThrowValidationException_WhenReelIsInvalid()
+    {
+        var reel = CreateTestReel();
+        reel.Name = string.Empty; // Invalid data
+
+        Func<Task> act = async () => await _reelService.AddAsync(reel);
+
+        await act.Should().ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ShouldThrowValidationException_WhenReelIsInvalid()
+    {
+        var reel = CreateTestReel();
+        _reelRepositoryMock.Setup(r => r.GetByIdAsync(reel.Id, It.IsAny<CancellationToken>())).ReturnsAsync(reel);
+        reel.Name = string.Empty; // Invalid data
+
+        Func<Task> act = async () => await _reelService.UpdateAsync(reel, reel.OwnerId);
+
+        await act.Should().ThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task AddAsync_ShouldNotThrowValidationException_WhenReelIsValid()
+    {
+        var reel = CreateTestReel();
+
+        Func<Task> act = async () => await _reelService.AddAsync(reel);
+
+        await act.Should().NotThrowAsync<ValidationException>();
+    }
+
+    [Fact]
+    public async Task UpdateAsync_ShouldNotThrowValidationException_WhenReelIsValid()
+    {
+        var reel = CreateTestReel();
+        _reelRepositoryMock.Setup(r => r.GetByIdAsync(reel.Id, It.IsAny<CancellationToken>())).ReturnsAsync(reel);
+
+        Func<Task> act = async () => await _reelService.UpdateAsync(reel, reel.OwnerId);
+
+        await act.Should().NotThrowAsync<ValidationException>();
+    }
 
     private Reel CreateTestReel(Guid? workspaceId = null, Guid? ownerId = null)
     {

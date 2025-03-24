@@ -26,6 +26,7 @@ public class ReelService : IReelService
 
     public async Task AddAsync(Reel reel, CancellationToken cancellationToken = default)
     {
+        await _reelValidator.ValidateAndThrowAsync(reel, cancellationToken);
         await _reelRepository.AddAsync(reel, cancellationToken);
     }
 

@@ -1,4 +1,4 @@
-﻿namespace Doner.Features.ReelsFeature.Services;
+﻿namespace Contracts.V1;
 
 public enum SearchOption
 {

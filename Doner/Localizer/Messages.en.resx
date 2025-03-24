@@ -32,4 +32,7 @@
     <data name="InternalServerError" xml:space="preserve">
       <value>An unexpected error occurred. Please try again later.</value>
     </data>
+  <data name="ReelNotFound" xml:space="preserve">
+      <value>Reel was not found</value>
+  </data>
 </root>

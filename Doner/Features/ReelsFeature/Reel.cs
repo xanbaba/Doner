@@ -16,6 +16,7 @@ public class Reel
     [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid WorkspaceId { get; set; }
 
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid OwnerId { get; set; }
     public IEnumerable<ReelElement> ReelElements { get; set; } = [];
 }

@@ -68,7 +68,7 @@ public class ReelServiceTests
         _reelRepositoryMock.Setup(r => r.GetByIdAsync(reel.Id, It.IsAny<CancellationToken>())).ReturnsAsync(reel);
         _reelRepositoryMock.Setup(r => r.UpdateAsync(reel, It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
-        var result = await _reelService.UpdateAsync(reel, reel.OwnerId);
+        var result = await _reelService.UpdateAsync(reel);
 
         result.Should().BeTrue();
         _reelRepositoryMock.Verify(r => r.UpdateAsync(reel, It.IsAny<CancellationToken>()), Times.Once);
@@ -77,10 +77,12 @@ public class ReelServiceTests
     [Fact]
     public async Task UpdateAsync_ShouldThrowUnauthorizedAccessException_WhenUserIsNotOwner()
     {
-        var reel = CreateTestReel();
+        var id = Guid.NewGuid();
+        var reel = CreateTestReel(id);
+        var reel2 = CreateTestReel(id);
         _reelRepositoryMock.Setup(r => r.GetByIdAsync(reel.Id, It.IsAny<CancellationToken>())).ReturnsAsync(reel);
 
-        Func<Task> act = async () => await _reelService.UpdateAsync(reel, Guid.NewGuid());
+        Func<Task> act = async () => await _reelService.UpdateAsync(reel2);
 
         await act.Should().ThrowAsync<UnauthorizedAccessException>();
     }
@@ -114,9 +116,11 @@ public class ReelServiceTests
     {
         var workspaceId = Guid.NewGuid();
         var userId = Guid.NewGuid();
-        var reels = new List<Reel> { CreateTestReel(workspaceId, userId) };
-        _workspaceServiceMock.Setup(w => w.GetAsync(workspaceId)).ReturnsAsync(new Result<Workspace>(new Workspace { OwnerId = userId }));
-        _reelRepositoryMock.Setup(r => r.GetByWorkspaceAsync(workspaceId, It.IsAny<CancellationToken>())).ReturnsAsync(reels);
+        var reels = new List<Reel> { CreateTestReel(workspaceId: workspaceId, ownerId: userId) };
+        _workspaceServiceMock.Setup(w => w.GetAsync(workspaceId))
+            .ReturnsAsync(new Result<Workspace>(new Workspace { OwnerId = userId }));
+        _reelRepositoryMock.Setup(r => r.GetByWorkspaceAsync(workspaceId, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(reels);
 
         var result = await _reelService.GetByWorkspaceAsync(workspaceId, userId);
 
@@ -128,7 +132,8 @@ public class ReelServiceTests
     {
         var workspaceId = Guid.NewGuid();
         var userId = Guid.NewGuid();
-        _workspaceServiceMock.Setup(w => w.GetAsync(workspaceId)).ReturnsAsync(new Result<Workspace>(new Workspace { OwnerId = Guid.NewGuid() }));
+        _workspaceServiceMock.Setup(w => w.GetAsync(workspaceId))
+            .ReturnsAsync(new Result<Workspace>(new Workspace { OwnerId = Guid.NewGuid() }));
 
         Func<Task> act = async () => await _reelService.GetByWorkspaceAsync(workspaceId, userId);
 
@@ -140,13 +145,14 @@ public class ReelServiceTests
     {
         var name = "Test";
         var reels = new List<Reel> { CreateTestReel() };
-        _reelRepositoryMock.Setup(r => r.SearchByNameAsync(name, SearchOption.FullMatch, It.IsAny<CancellationToken>())).ReturnsAsync(reels);
+        _reelRepositoryMock.Setup(r => r.SearchByNameAsync(name, SearchOption.FullMatch, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(reels);
 
         var result = await _reelService.SearchByNameAsync(name, SearchOption.FullMatch);
 
         result.Should().BeEquivalentTo(reels);
     }
-    
+
     [Fact]
     public async Task AddAsync_ShouldThrowValidationException_WhenReelIsInvalid()
     {
@@ -165,7 +171,7 @@ public class ReelServiceTests
         _reelRepositoryMock.Setup(r => r.GetByIdAsync(reel.Id, It.IsAny<CancellationToken>())).ReturnsAsync(reel);
         reel.Name = string.Empty; // Invalid data
 
-        Func<Task> act = async () => await _reelService.UpdateAsync(reel, reel.OwnerId);
+        Func<Task> act = async () => await _reelService.UpdateAsync(reel);
 
         await act.Should().ThrowAsync<ValidationException>();
     }
@@ -186,16 +192,16 @@ public class ReelServiceTests
         var reel = CreateTestReel();
         _reelRepositoryMock.Setup(r => r.GetByIdAsync(reel.Id, It.IsAny<CancellationToken>())).ReturnsAsync(reel);
 
-        Func<Task> act = async () => await _reelService.UpdateAsync(reel, reel.OwnerId);
+        Func<Task> act = async () => await _reelService.UpdateAsync(reel);
 
         await act.Should().NotThrowAsync<ValidationException>();
     }
 
-    private Reel CreateTestReel(Guid? workspaceId = null, Guid? ownerId = null)
+    private static Reel CreateTestReel(Guid? id = null, Guid? workspaceId = null, Guid? ownerId = null)
     {
         return new Reel
         {
-            Id = Guid.NewGuid(),
+            Id = id ?? Guid.NewGuid(),
             Name = "Test Reel",
             WorkspaceId = workspaceId ?? Guid.NewGuid(),
             OwnerId = ownerId ?? Guid.NewGuid()

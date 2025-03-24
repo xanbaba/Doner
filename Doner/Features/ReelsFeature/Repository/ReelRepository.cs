@@ -28,7 +28,11 @@ public class ReelRepository : IReelRepository
 
     public async Task<bool> UpdateAsync(Reel reel, CancellationToken cancellationToken = default)
     {
-        return await _reelsMongoCollection.FindOneAndReplaceAsync(r => r.Id == reel.Id, reel, cancellationToken: cancellationToken) != null;
+        var update = Builders<Reel>.Update
+            .Set(r => r.Name, reel.Name)
+            .Set(r => r.Description, reel.Description);
+        return await _reelsMongoCollection.FindOneAndUpdateAsync(r => r.Id == reel.Id, update,
+            cancellationToken: cancellationToken) != null;
     }
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)

@@ -82,11 +82,12 @@ public class ReelServiceIntegrationTests : IDisposable
     [Fact]
     public async Task UpdateAsync_ShouldUpdateReel_WhenUserIsOwner()
     {
-        var reel = CreateTestReel();
+        var id = Guid.NewGuid();
+        var reel = CreateTestReel(id);
         await _reelCollection.InsertOneAsync(reel);
         reel.Name = "Updated Name";
 
-        var result = await _reelService.UpdateAsync(reel, reel.OwnerId);
+        var result = await _reelService.UpdateAsync(reel);
 
         result.Should().BeTrue();
         var updated = await _reelCollection.Find(r => r.Id == reel.Id).FirstOrDefaultAsync();
@@ -99,8 +100,9 @@ public class ReelServiceIntegrationTests : IDisposable
         var reel = CreateTestReel();
         await _reelCollection.InsertOneAsync(reel);
         reel.Name = "Updated Name";
+        reel.OwnerId = Guid.NewGuid();
 
-        Func<Task> act = async () => await _reelService.UpdateAsync(reel, Guid.NewGuid());
+        Func<Task> act = async () => await _reelService.UpdateAsync(reel);
 
         await act.Should().ThrowAsync<UnauthorizedAccessException>();
     }
@@ -112,7 +114,7 @@ public class ReelServiceIntegrationTests : IDisposable
         await _reelCollection.InsertOneAsync(reel);
         reel.Name = string.Empty; // Invalid data
 
-        Func<Task> act = async () => await _reelService.UpdateAsync(reel, reel.OwnerId);
+        Func<Task> act = async () => await _reelService.UpdateAsync(reel);
 
         await act.Should().ThrowAsync<ValidationException>();
     }
@@ -146,7 +148,7 @@ public class ReelServiceIntegrationTests : IDisposable
     {
         var workspaceId = Guid.NewGuid();
         var userId = Guid.NewGuid();
-        var reels = new List<Reel> { CreateTestReel(workspaceId, userId) };
+        var reels = new List<Reel> { CreateTestReel(workspaceId: workspaceId, ownerId: userId) };
         await _reelCollection.InsertManyAsync(reels);
         _workspaceServiceMock.Setup(w => w.GetAsync(workspaceId)).ReturnsAsync(new Result<Workspace>(new Workspace { OwnerId = userId }));
 
@@ -179,11 +181,11 @@ public class ReelServiceIntegrationTests : IDisposable
         result.Should().BeEquivalentTo(reels);
     }
 
-    private Reel CreateTestReel(Guid? workspaceId = null, Guid? ownerId = null, string? name = null)
+    private Reel CreateTestReel(Guid? id = null, Guid? workspaceId = null, Guid? ownerId = null, string? name = null)
     {
         return new Reel
         {
-            Id = Guid.NewGuid(),
+            Id = id ?? Guid.NewGuid(),
             Name = name ?? "Test Reel",
             Description = "Test Description",
             WorkspaceId = workspaceId ?? Guid.NewGuid(),

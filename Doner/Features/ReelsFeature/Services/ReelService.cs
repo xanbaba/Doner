@@ -46,7 +46,7 @@ public class ReelService : IReelService
         return reel;
     }
 
-    public async Task<bool> UpdateAsync(Reel reel, Guid userId, CancellationToken cancellationToken = default)
+    public async Task<bool> UpdateAsync(Reel reel, CancellationToken cancellationToken = default)
     {
         var existingReel = await _reelRepository.GetByIdAsync(reel.Id, cancellationToken);
         if (existingReel is null)
@@ -54,14 +54,9 @@ public class ReelService : IReelService
             return false;
         }
 
-        if (existingReel.OwnerId != userId)
-        {
-            throw new UnauthorizedAccessException();
-        }
-
         if (reel.OwnerId != existingReel.OwnerId)
         {
-            throw new InvalidOperationException("Updating the OwnerId is not allowed.");
+            throw new UnauthorizedAccessException();
         }
 
         await _reelValidator.ValidateAndThrowAsync(reel, cancellationToken);

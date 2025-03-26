@@ -4,19 +4,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Doner.DataBase;
 
-public class AppDbContext(IConfiguration configuration) : DbContext
+public class AppDbContext : DbContext
 {
     public DbSet<User> Users { get; set; }
     public DbSet<Workspace> Workspaces { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<WorkspaceInvite> WorkspaceInvites { get; set; }
-
+    
+    public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options)
+    {
+    }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
-        optionsBuilder.UseSqlServer(connectionString);
-        optionsBuilder.EnableSensitiveDataLogging();
+        
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -2,6 +2,7 @@ using Doner;
 using Doner.DataBase;
 using Doner.Features.AuthFeature;
 using Doner.Features.WorkspaceFeature;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +14,11 @@ builder.Configuration.AddEnvironmentVariables();
 builder.Services.AddOpenApi();
 builder.AddFeature<AuthFeature>();
 builder.AddFeature<WorkspaceFeature>();
-builder.Services.AddDbContextFactory<AppDbContext>();
+builder.Services.AddDbContextFactory<AppDbContext>(optionsBuilder =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    optionsBuilder.UseSqlServer(connectionString);
+});
 
 var app = builder.Build();
 

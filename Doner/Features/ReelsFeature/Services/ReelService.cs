@@ -1,5 +1,5 @@
 ﻿using Doner.Features.ReelsFeature.Repository;
-using Doner.Features.WorkspaceFeature.Service;
+using Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 using FluentValidation;
 using LanguageExt;
 using SearchOption = Contracts.V1.SearchOption;

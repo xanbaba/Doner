@@ -2,7 +2,7 @@
 using Doner.Features.ReelsFeature.Repository;
 using Doner.Features.ReelsFeature.Services;
 using Doner.Features.WorkspaceFeature.Entities;
-using Doner.Features.WorkspaceFeature.Service;
+using Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 using FluentAssertions;
 using FluentValidation;
 using LanguageExt.Common;

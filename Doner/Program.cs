@@ -1,6 +1,7 @@
 using Doner;
 using Doner.DataBase;
 using Doner.Features.AuthFeature;
+using Doner.Features.WorkspaceFeature;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,6 +12,7 @@ builder.Configuration.AddEnvironmentVariables();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.AddFeature<AuthFeature>();
+builder.AddFeature<WorkspaceFeature>();
 builder.Services.AddDbContextFactory<AppDbContext>();
 
 var app = builder.Build();
@@ -28,4 +30,5 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseFeature<AuthFeature>();
+app.UseFeature<WorkspaceFeature>();
 app.Run();

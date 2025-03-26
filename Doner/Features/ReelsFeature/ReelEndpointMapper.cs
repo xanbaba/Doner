@@ -12,11 +12,12 @@ public class ReelEndpointMapper : IEndpointMapper
 {
     public static void Map(IEndpointRouteBuilder builder)
     {
-        builder.MapGet("/me/workspaces/{workspaceId:guid}/reels", GetReels);
-        builder.MapGet("/me/reels/{reelId:guid}", GetReelById).WithName(nameof(GetReelById));
-        builder.MapPost("/me/workspaces/{workspaceId:guid}/reels", AddReel);
-        builder.MapPut("/me/reels/{reelId:guid}", UpdateReel);
-        builder.MapDelete("/me/reels/{reelId:guid}", DeleteReel);
+        var authGroup = builder.MapGroup("/").RequireAuthorization();
+        authGroup.MapGet("/me/workspaces/{workspaceId:guid}/reels", GetReels);
+        authGroup.MapGet("/me/reels/{reelId:guid}", GetReelById).WithName(nameof(GetReelById));
+        authGroup.MapPost("/me/workspaces/{workspaceId:guid}/reels", AddReel);
+        authGroup.MapPut("/me/reels/{reelId:guid}", UpdateReel);
+        authGroup.MapDelete("/me/reels/{reelId:guid}", DeleteReel);
     }
 
     private static async Task<Results<NotFound, NoContent, ForbidHttpResult>> DeleteReel

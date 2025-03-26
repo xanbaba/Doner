@@ -22,6 +22,6 @@ public class ReelsFeature: IFeature
 
     public static void Configure(WebApplication app)
     {
-        
+        app.MapEndpoints<ReelEndpointMapper>();
     }
 }

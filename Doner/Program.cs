@@ -1,6 +1,7 @@
 using Doner;
 using Doner.DataBase;
 using Doner.Features.AuthFeature;
+using Doner.Features.ReelsFeature;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,4 +29,5 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseFeature<AuthFeature>();
+app.UseFeature<ReelsFeature>();
 app.Run();

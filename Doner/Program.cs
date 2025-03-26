@@ -1,43 +1,50 @@
-using Doner;
 using Doner.DataBase;
 using Doner.Features.AuthFeature;
 using Doner.Features.ReelsFeature;
 using Doner.Features.WorkspaceFeature;
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
+namespace Doner;
 
-DotNetEnv.Env.Load("../.env");
-builder.Configuration.AddEnvironmentVariables();
-
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
-builder.AddFeature<AuthFeature>();
-builder.AddFeature<ReelsFeature>();
-builder.AddFeature<WorkspaceFeature>();
-builder.Services.AddDbContextFactory<AppDbContext>(optionsBuilder =>
+public class Program
 {
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    optionsBuilder.UseSqlServer(connectionString);
-});
+    public static void Main(string[] args)
+    {
+        var builder = WebApplication.CreateBuilder(args);
 
-var app = builder.Build();
+        DotNetEnv.Env.Load("../.env");
+        builder.Configuration.AddEnvironmentVariables();
 
-app.MigrateDatabase<AppDbContext>();
+        // Add services to the container.
+        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+        builder.Services.AddOpenApi();
+        builder.AddFeature<AuthFeature>();
+        builder.AddFeature<ReelsFeature>();
+        builder.AddFeature<WorkspaceFeature>();
+        builder.Services.AddDbContextFactory<AppDbContext>(optionsBuilder =>
+        {
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            optionsBuilder.UseSqlServer(connectionString);
+        });
 
-// app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureDeleted();
-// app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
+        var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
+        app.MigrateDatabase<AppDbContext>();
+
+        // app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureDeleted();
+        // app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
+
+        // Configure the HTTP request pipeline.
+        if (app.Environment.IsDevelopment())
+        {
+            app.MapOpenApi();
+        }
+        app.UseHttpsRedirection();
+        app.UseMiddleware<ExceptionHandlingMiddleware>();
+        app.UseFeature<AuthFeature>();
+        app.UseFeature<ReelsFeature>();
+        app.UseFeature<WorkspaceFeature>();
+
+        app.Run();
+    }
 }
-app.UseHttpsRedirection();
-app.UseMiddleware<ExceptionHandlingMiddleware>();
-app.UseFeature<AuthFeature>();
-app.UseFeature<ReelsFeature>();
-app.UseFeature<WorkspaceFeature>();
-
-app.Run();

@@ -1,4 +1,3 @@
-using System.Runtime.InteropServices.ComTypes;
 using Doner.Features.WorkspaceFeature.Entities;
 using Doner.Features.WorkspaceFeature.Exceptions;
 using Doner.Features.WorkspaceFeature.Repository;
@@ -6,9 +5,8 @@ using Doner.Localizer;
 using LanguageExt;
 using LanguageExt.Common;
 using Microsoft.Extensions.Localization;
-using Sprache;
 
-namespace Doner.Features.WorkspaceFeature.Service;
+namespace Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 
 public class WorkspaceService(IWorkspaceRepository workspaceRepository, IStringLocalizer<Messages> localizer): WorkspaceServiceBase
 {
@@ -61,6 +59,11 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository, IStringL
         if (workspace.OwnerId != userId)
         {
             return new Result<Unit>(new PermissionDeniedException(localizer["PermissionDenied"].Value));
+        }
+        
+        if (await workspaceRepository.Exists(workspace.OwnerId, workspace.Name))
+        {
+            return new Result<Unit>(new WorkspaceAlreadyExistsException(localizer["WorkspaceAlreadyExists"].Value));
         }
         
         await workspaceRepository.UpdateAsync(workspace);

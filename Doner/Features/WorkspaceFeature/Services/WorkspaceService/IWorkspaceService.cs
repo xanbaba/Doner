@@ -1,9 +1,8 @@
 using Doner.Features.WorkspaceFeature.Entities;
 using LanguageExt;
 using LanguageExt.Common;
-using Sprache;
 
-namespace Doner.Features.WorkspaceFeature.Service;
+namespace Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 
 public interface IWorkspaceService
 {

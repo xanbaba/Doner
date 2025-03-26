@@ -2,6 +2,8 @@ using Doner;
 using Doner.DataBase;
 using Doner.Features.AuthFeature;
 using Doner.Features.ReelsFeature;
+using Doner.Features.WorkspaceFeature;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +14,13 @@ builder.Configuration.AddEnvironmentVariables();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 builder.AddFeature<AuthFeature>();
-builder.Services.AddDbContextFactory<AppDbContext>();
+builder.AddFeature<ReelsFeature>();
+builder.AddFeature<WorkspaceFeature>();
+builder.Services.AddDbContextFactory<AppDbContext>(optionsBuilder =>
+{
+    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+    optionsBuilder.UseSqlServer(connectionString);
+});
 
 var app = builder.Build();
 
@@ -30,4 +38,6 @@ app.UseHttpsRedirection();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseFeature<AuthFeature>();
 app.UseFeature<ReelsFeature>();
+app.UseFeature<WorkspaceFeature>();
+
 app.Run();

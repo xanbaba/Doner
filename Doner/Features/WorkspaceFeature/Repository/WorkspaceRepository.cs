@@ -42,7 +42,8 @@ public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactor
             return;
         }
 
-        context.Entry(entity).CurrentValues.SetValues(workspace);
+        entity.Name = workspace.Name;
+        entity.Description = workspace.Description;
         
         await context.SaveChangesAsync();
     }

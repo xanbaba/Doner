@@ -12,8 +12,7 @@ public static class WorkspaceMapper
             Id = workspace.Id,
             Name = workspace.Name,
             Description = workspace.Description,
-            OwnerId = workspace.OwnerId,
-            IsArchived = workspace.IsArchived
+            OwnerId = workspace.OwnerId
         };
     }
 

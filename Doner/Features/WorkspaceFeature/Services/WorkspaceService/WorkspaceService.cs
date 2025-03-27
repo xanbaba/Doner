@@ -1,14 +1,12 @@
 using Doner.Features.WorkspaceFeature.Entities;
 using Doner.Features.WorkspaceFeature.Exceptions;
 using Doner.Features.WorkspaceFeature.Repository;
-using Doner.Localizer;
 using LanguageExt;
 using LanguageExt.Common;
-using Microsoft.Extensions.Localization;
 
 namespace Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 
-public class WorkspaceService(IWorkspaceRepository workspaceRepository, IStringLocalizer<Messages> localizer): WorkspaceServiceBase
+public class WorkspaceService(IWorkspaceRepository workspaceRepository): WorkspaceServiceBase
 {
     public override async Task<Result<IEnumerable<Workspace>>> GetByOwnerAsync(Guid ownerId)
     {
@@ -23,7 +21,7 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository, IStringL
         
         if (workspace is null)
         {
-            return new Result<Workspace>(new WorkspaceNotFoundException(localizer["WorkspaceNotFound"].Value));
+            return new Result<Workspace>(new WorkspaceNotFoundException());
         }
         
         return new Result<Workspace>(workspace);
@@ -33,12 +31,12 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository, IStringL
     {
         if (string.IsNullOrWhiteSpace(workspace.Name))
         {
-            return new Result<Guid>(new WorkspaceNameRequiredException(localizer["WorkspaceNameRequired"].Value));
+            return new Result<Guid>(new WorkspaceNameRequiredException());
         }
 
         if (await workspaceRepository.Exists(workspace.OwnerId, workspace.Name))
         {
-            return new Result<Guid>(new WorkspaceAlreadyExistsException(localizer["WorkspaceAlreadyExists"].Value));
+            return new Result<Guid>(new WorkspaceAlreadyExistsException());
         }
             
         workspace.Id = Guid.CreateVersion7();
@@ -53,17 +51,17 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository, IStringL
 
         if (!await workspaceRepository.Exists(workspace.Id))
         {
-            return new Result<Unit>(new WorkspaceNotFoundException(localizer["WorkspaceNotFound"].Value));
+            return new Result<Unit>(new WorkspaceNotFoundException());
         }
         
         if (workspace.OwnerId != userId)
         {
-            return new Result<Unit>(new PermissionDeniedException(localizer["PermissionDenied"].Value));
+            return new Result<Unit>(new PermissionDeniedException());
         }
         
         if (await workspaceRepository.Exists(workspace.OwnerId, workspace.Name))
         {
-            return new Result<Unit>(new WorkspaceAlreadyExistsException(localizer["WorkspaceAlreadyExists"].Value));
+            return new Result<Unit>(new WorkspaceAlreadyExistsException());
         }
         
         await workspaceRepository.UpdateAsync(workspace);
@@ -77,12 +75,12 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository, IStringL
         
         if (workspace == null)
         {
-            return new Result<Unit>(new WorkspaceNotFoundException(localizer["WorkspaceNotFound"].Value));
+            return new Result<Unit>(new WorkspaceNotFoundException());
         }
         
         if (workspace.OwnerId != userId)
         {
-            return new Result<Unit>(new PermissionDeniedException(localizer["PermissionDenied"].Value));
+            return new Result<Unit>(new PermissionDeniedException());
         }
         
         await workspaceRepository.RemoveAsync(workspaceId);

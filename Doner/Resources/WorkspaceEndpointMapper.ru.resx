@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <data name="WorkspaceCreated" xml:space="preserve">
+      <value>Рабочее пространство было создано успешно.</value>
+    </data>
+
+    <data name="WorkspaceNameRequired" xml:space="preserve">
+      <value>Укажите название рабочего пространства.</value>
+    </data>
+    
+    <data name="WorkspaceAlreadyExists" xml:space="preserve">
+      <value>Рабочее пространство с данным именем уже существует.</value>
+    </data>
+
+    <data name="WorkspaceNotFound" xml:space="preserve">
+      <value>Рабочее пространство не найдено.</value>
+    </data>
+</root>

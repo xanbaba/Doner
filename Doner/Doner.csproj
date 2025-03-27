@@ -23,4 +23,31 @@
       <ProjectReference Include="..\Doner.Contracts\Doner.Contracts.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Localizer\Messages.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Localizer\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Resources\WorkspaceEndpointMapper.en.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>WorkspaceEndpointMapper.en.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\SharedResources.en.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>SharedResources.en.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\WorkspaceEndpointMapper.ru.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>WorkspaceEndpointMapper.en.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+      <EmbeddedResource Update="Resources\SharedResources.ru.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>SharedResources.en.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
+    </ItemGroup>
+
 </Project>

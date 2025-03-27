@@ -4,8 +4,7 @@ using Doner.Features.WorkspaceFeature.Entities;
 using Doner.Features.WorkspaceFeature.Exceptions;
 using Doner.Features.WorkspaceFeature.Services;
 using Doner.Features.WorkspaceFeature.Services.WorkspaceService;
-using Doner.Localizer;
-using LanguageExt;
+using Doner.Resources;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
@@ -16,26 +15,18 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
 {
     public static void Map(IEndpointRouteBuilder builder)
     {
-        builder.MapGet("/users/me/workspaces", GetByOwnerAsync);
-        
-        var workspacesGroup = builder.MapGroup("/workspaces").RequireAuthorization();
-        
+        var workspacesGroup = builder.MapGroup("/users/me/workspaces").RequireAuthorization();
+
+        workspacesGroup.MapGet("/", GetByOwnerAsync);
         workspacesGroup.MapGet("/{id:guid}", GetWorkspace);
         workspacesGroup.MapPost("/", AddWorkspace);
         workspacesGroup.MapPut("/", UpdateWorkspace);
         workspacesGroup.MapDelete("/{id:guid}", RemoveWorkspace);
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="workspaceService"></param>
-    /// <param name="user"></param>
-    /// <param name="localizer"></param>
-    /// <returns>All workspaces</returns>
     private static async Task<Ok<WorkspacesResponse>> GetByOwnerAsync(
         [FromServices] IWorkspaceService workspaceService,
-        [FromServices] IStringLocalizer<Messages> localizer,
+        [FromServices] IStringLocalizer<WorkspaceEndpointMapper> localizer,
         ClaimsPrincipal user
     )
     {
@@ -46,16 +37,9 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
             exception => throw exception);
     }
 
-    /// <summary>
-    /// Not found if workspace with provided id is not found
-    /// </summary>
-    /// <param name="workspaceService"></param>
-    /// <param name="localizer"></param>
-    /// <param name="id"></param>
-    /// <returns>Workspace json</returns>
     private static async Task<Results<NotFound<string>, Ok<WorkspaceResponse>>> GetWorkspace(
         [FromServices] IWorkspaceService workspaceService,
-        [FromServices] IStringLocalizer<Messages> localizer,
+        [FromServices] IStringLocalizer<WorkspaceEndpointMapper> localizer,
         [FromRoute] Guid id
         )
     {
@@ -64,86 +48,60 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
         return workspaceResult
             .Match<Results<NotFound<string>, Ok<WorkspaceResponse>>>(
                 workspace => TypedResults.Ok(workspace.ToResponse()), 
-                exception => TypedResults.NotFound(exception.Message));
+                exception => exception switch
+                {
+                    WorkspaceNotFoundException => TypedResults.NotFound(localizer["WorkspaceNotFound"].Value),
+                    _ => throw exception
+                });
     }
 
-    /// <summary>
-    /// bad request if an invalid workspace json is provided
-    /// </summary>
-    /// <param name="workspaceService"></param>
-    /// <param name="localizer"></param>
-    /// <param name="workspace"></param>
-    /// <param name="user"></param>
-    /// <returns>Id of just now created workspace</returns>
     private static async Task<Results<BadRequest<string>, NotFound<string>, Created>> AddWorkspace(
         [FromServices] IWorkspaceService workspaceService,
-        [FromServices] IStringLocalizer<Messages> localizer,
-        [FromBody] Workspace? workspace,
+        [FromServices] IStringLocalizer<WorkspaceEndpointMapper> localizer,
+        [FromBody] Workspace workspace,
         ClaimsPrincipal user
         )
     {
-        if (workspace is null)
-        {
-            return TypedResults.BadRequest(localizer["InvalidWorkspace"].Value);
-        }
-        
         workspace.OwnerId = user.GetUserId();
         
         var workspaceResult = await workspaceService.CreateAsync(workspace);
 
         return workspaceResult.Match<Results<BadRequest<string>, NotFound<string>, Created>>(
             workspaceId => TypedResults.Created(workspaceId.ToString()),
-            exception => TypedResults.NotFound(exception.Message)
-        );
-    }
-
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="workspaceService"></param>
-    /// <param name="localizer"></param>
-    /// <param name="workspace"></param>
-    /// <param name="user"></param>
-    /// <returns></returns>
-    /// <exception cref="Exception"></exception>
-    private static async Task<Results<NoContent, BadRequest<string>, NotFound<string>>> UpdateWorkspace(
-        [FromServices] IWorkspaceService workspaceService,
-        [FromServices] IStringLocalizer<Messages> localizer,
-        [FromBody] Workspace? workspace,
-        ClaimsPrincipal user
-        )
-    {
-
-        if (workspace is null)
-        {
-            return TypedResults.BadRequest(localizer["InvalidWorkspace"].Value);
-        }
-        
-        var workspaceResult = await workspaceService.UpdateAsync(user.GetUserId(), workspace);
-
-        return workspaceResult.Match<Results<NoContent, BadRequest<string>, NotFound<string>>>(
-            _ => TypedResults.NoContent(),
-            exception =>
+            exception => exception switch
             {
-                return exception switch
-                {
-                    (WorkspaceNotFoundException) => TypedResults.NotFound(exception.Message),
-                    (PermissionDeniedException) => TypedResults.BadRequest(exception.Message),
-                    _ => throw exception
-                };
+                WorkspaceNameRequiredException => TypedResults.BadRequest(localizer["WorkspaceNameRequired"].Value),
+                WorkspaceAlreadyExistsException => TypedResults.BadRequest(localizer["WorkspaceAlreadyExists"].Value),
+                _ => throw exception
             }
         );
     }
     
-    /// <summary>
-    /// Not found if workspace with provided id is not found
-    /// </summary>
-    /// <param name="workspaceService"></param>
-    /// <param name="id"></param>
-    /// <param name="user"></param>
-    /// <returns>error, ok</returns>
+    private static async Task<Results<NoContent, BadRequest<string>, NotFound<string>>> UpdateWorkspace(
+        [FromServices] IWorkspaceService workspaceService,
+        [FromServices] IStringLocalizer<WorkspaceEndpointMapper> localizer,
+        [FromServices] IStringLocalizer<SharedResources> sharedLocalizer,
+        [FromBody] Workspace workspace,
+        ClaimsPrincipal user
+        )
+    {
+        var workspaceResult = await workspaceService.UpdateAsync(user.GetUserId(), workspace);
+
+        return workspaceResult.Match<Results<NoContent, BadRequest<string>, NotFound<string>>>(
+            _ => TypedResults.NoContent(),
+            exception => exception switch
+            {
+                WorkspaceNotFoundException => TypedResults.NotFound(localizer["WorkspaceNotFound"].Value),
+                PermissionDeniedException => TypedResults.BadRequest(sharedLocalizer["PermissionDenied"].Value),
+                WorkspaceAlreadyExistsException => TypedResults.BadRequest(localizer["WorkspaceAlreadyExists"].Value),
+                _ => throw exception
+            });
+    }
+    
     private static async Task<Results<NotFound<string>, NoContent, BadRequest<string>>> RemoveWorkspace(
         [FromServices] IWorkspaceService workspaceService,
+        [FromServices] IStringLocalizer<WorkspaceEndpointMapper> localizer,
+        [FromServices] IStringLocalizer<SharedResources> sharedLocalizer,
         [FromRoute] Guid id,
         ClaimsPrincipal user
     )
@@ -156,8 +114,8 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
             {
                 return exception switch
                 {
-                    WorkspaceNotFoundException => TypedResults.NotFound(exception.Message),
-                    PermissionDeniedException => TypedResults.BadRequest(exception.Message),
+                    WorkspaceNotFoundException => TypedResults.NotFound(localizer["WorkspaceNotFound"].Value),
+                    PermissionDeniedException => TypedResults.BadRequest(sharedLocalizer["PermissionDenied"].Value),
                     _ => throw exception
                 };
             }

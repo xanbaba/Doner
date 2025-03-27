@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <data name="WorkspaceCreated" xml:space="preserve">
+      <value>Workspace successfully created!</value>
+    </data>
+
+    <data name="WorkspaceNameRequired" xml:space="preserve">
+      <value>Workspace name is required.</value>
+    </data>
+
+    <data name="WorkspaceAlreadyExists" xml:space="preserve">
+      <value>A workspace with this name already exists.</value>
+    </data>
+
+    <data name="WorkspaceNotFound" xml:space="preserve">
+      <value>Workspace not found.</value>
+    </data>
+</root>

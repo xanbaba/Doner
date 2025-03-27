@@ -1,28 +1,27 @@
 using System.Security.Claims;
+using Contracts.V1.Requests;
 using Contracts.V1.Responses;
-using Doner.Features.WorkspaceFeature.Entities;
 using Doner.Features.WorkspaceFeature.Exceptions;
 using Doner.Features.WorkspaceFeature.Services;
 using Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 using Doner.Localizer;
-using LanguageExt;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Localization;
 
 namespace Doner.Features.WorkspaceFeature;
 
-public abstract class WorkspaceEndpointMapper: IEndpointMapper
+public abstract class WorkspaceEndpointMapper : IEndpointMapper
 {
     public static void Map(IEndpointRouteBuilder builder)
     {
         builder.MapGet("/users/me/workspaces", GetByOwnerAsync);
-        
-        var workspacesGroup = builder.MapGroup("/workspaces").RequireAuthorization();
-        
+
+        var workspacesGroup = builder.MapGroup("/me/workspaces").RequireAuthorization();
+
         workspacesGroup.MapGet("/{id:guid}", GetWorkspace);
         workspacesGroup.MapPost("/", AddWorkspace);
-        workspacesGroup.MapPut("/", UpdateWorkspace);
+        workspacesGroup.MapPut("/{id:guid}", UpdateWorkspace);
         workspacesGroup.MapDelete("/{id:guid}", RemoveWorkspace);
     }
 
@@ -40,7 +39,7 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
     )
     {
         var workspacesResult = await workspaceService.GetByOwnerAsync(user.GetUserId());
-        
+
         return workspacesResult.Match(
             items => TypedResults.Ok(items.ToResponse()),
             exception => throw exception);
@@ -57,38 +56,25 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
         [FromServices] IWorkspaceService workspaceService,
         [FromServices] IStringLocalizer<Messages> localizer,
         [FromRoute] Guid id
-        )
+    )
     {
         var workspaceResult = await workspaceService.GetAsync(id);
-        
+
         return workspaceResult
             .Match<Results<NotFound<string>, Ok<WorkspaceResponse>>>(
-                workspace => TypedResults.Ok(workspace.ToResponse()), 
+                workspace => TypedResults.Ok(workspace.ToResponse()),
                 exception => TypedResults.NotFound(exception.Message));
     }
 
-    /// <summary>
-    /// bad request if an invalid workspace json is provided
-    /// </summary>
-    /// <param name="workspaceService"></param>
-    /// <param name="localizer"></param>
-    /// <param name="workspace"></param>
-    /// <param name="user"></param>
-    /// <returns>Id of just now created workspace</returns>
     private static async Task<Results<BadRequest<string>, NotFound<string>, Created>> AddWorkspace(
         [FromServices] IWorkspaceService workspaceService,
         [FromServices] IStringLocalizer<Messages> localizer,
-        [FromBody] Workspace? workspace,
+        [FromBody] AddWorkspaceRequest request,
         ClaimsPrincipal user
-        )
+    )
     {
-        if (workspace is null)
-        {
-            return TypedResults.BadRequest(localizer["InvalidWorkspace"].Value);
-        }
-        
-        workspace.OwnerId = user.GetUserId();
-        
+        var workspace = request.ToWorkspace(user.GetUserId());
+
         var workspaceResult = await workspaceService.CreateAsync(workspace);
 
         return workspaceResult.Match<Results<BadRequest<string>, NotFound<string>, Created>>(
@@ -97,29 +83,17 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
         );
     }
 
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <param name="workspaceService"></param>
-    /// <param name="localizer"></param>
-    /// <param name="workspace"></param>
-    /// <param name="user"></param>
-    /// <returns></returns>
-    /// <exception cref="Exception"></exception>
-    private static async Task<Results<NoContent, BadRequest<string>, NotFound<string>>> UpdateWorkspace(
+    private static async Task<Results<NoContent, BadRequest<string>, NotFound<string>>> UpdateWorkspace
+    (
         [FromServices] IWorkspaceService workspaceService,
         [FromServices] IStringLocalizer<Messages> localizer,
-        [FromBody] Workspace? workspace,
-        ClaimsPrincipal user
-        )
+        [FromBody] UpdateWorkspaceRequest request,
+        ClaimsPrincipal user,
+        Guid id
+    )
     {
-
-        if (workspace is null)
-        {
-            return TypedResults.BadRequest(localizer["InvalidWorkspace"].Value);
-        }
-        
-        var workspaceResult = await workspaceService.UpdateAsync(user.GetUserId(), workspace);
+        var workspace = request.ToWorkspace(id, user.GetUserId());
+        var workspaceResult = await workspaceService.UpdateAsync(workspace);
 
         return workspaceResult.Match<Results<NoContent, BadRequest<string>, NotFound<string>>>(
             _ => TypedResults.NoContent(),
@@ -127,14 +101,14 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
             {
                 return exception switch
                 {
-                    (WorkspaceNotFoundException) => TypedResults.NotFound(exception.Message),
-                    (PermissionDeniedException) => TypedResults.BadRequest(exception.Message),
+                    WorkspaceNotFoundException => TypedResults.NotFound(exception.Message),
+                    PermissionDeniedException => TypedResults.BadRequest(exception.Message),
                     _ => throw exception
                 };
             }
         );
     }
-    
+
     /// <summary>
     /// Not found if workspace with provided id is not found
     /// </summary>
@@ -149,7 +123,7 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
     )
     {
         var workspaceResult = await workspaceService.RemoveAsync(user.GetUserId(), id);
-        
+
         return workspaceResult.Match<Results<NotFound<string>, NoContent, BadRequest<string>>>(
             _ => TypedResults.NoContent(),
             exception =>

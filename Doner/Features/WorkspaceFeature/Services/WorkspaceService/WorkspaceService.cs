@@ -48,15 +48,16 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository, IStringL
         return new Result<Guid>(workspace.Id);
     }
 
-    public override async Task<Result<Unit>> UpdateAsync(Guid userId, Workspace workspace)
+    public override async Task<Result<Unit>> UpdateAsync(Workspace workspace)
     {
+        var existingWorkspace = await workspaceRepository.GetAsync(workspace.Id);
 
-        if (!await workspaceRepository.Exists(workspace.Id))
+        if (existingWorkspace is null)
         {
             return new Result<Unit>(new WorkspaceNotFoundException(localizer["WorkspaceNotFound"].Value));
         }
         
-        if (workspace.OwnerId != userId)
+        if (existingWorkspace.OwnerId != workspace.OwnerId)
         {
             return new Result<Unit>(new PermissionDeniedException(localizer["PermissionDenied"].Value));
         }

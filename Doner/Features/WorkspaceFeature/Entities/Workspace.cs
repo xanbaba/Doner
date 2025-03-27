@@ -13,6 +13,4 @@ public class Workspace
     public User Owner { get; set; } = null!;
 
     public List<WorkspaceInvite> Invitees { get; set; } = null!;
-    
-    public bool IsArchived { get; set; }
 }

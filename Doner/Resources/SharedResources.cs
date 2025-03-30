@@ -1,3 +1,6 @@
 ﻿namespace Doner.Resources;
 
-public class SharedResources;
+public static class SharedResources
+{
+    public const string PermissionDenied = "Permission denied.";
+};

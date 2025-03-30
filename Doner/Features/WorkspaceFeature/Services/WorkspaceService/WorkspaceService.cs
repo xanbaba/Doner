@@ -19,12 +19,7 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository): Workspa
     {
         var workspace = await workspaceRepository.GetAsync(id);
         
-        if (workspace is null)
-        {
-            return new Result<Workspace>(new WorkspaceNotFoundException());
-        }
-        
-        return new Result<Workspace>(workspace);
+        return workspace ?? new Result<Workspace>(new WorkspaceNotFoundException());
     }
 
     public override async Task<Result<Guid>> CreateAsync(Workspace workspace)
@@ -43,7 +38,7 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository): Workspa
         
         await workspaceRepository.AddAsync(workspace);
         
-        return new Result<Guid>(workspace.Id);
+        return workspace.Id;
     }
 
     public override async Task<Result<Unit>> UpdateAsync(Workspace workspace)
@@ -67,7 +62,7 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository): Workspa
         
         await workspaceRepository.UpdateAsync(workspace);
         
-        return new Result<Unit>();
+        return Unit.Default;
     }
     
     public override async Task<Result<Unit>> RemoveAsync(Guid userId, Guid workspaceId)
@@ -86,6 +81,6 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository): Workspa
         
         await workspaceRepository.RemoveAsync(workspaceId);
 
-        return new Result<Unit>();
+        return Unit.Default;
     }
 }

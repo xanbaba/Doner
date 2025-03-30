@@ -7,12 +7,15 @@ using Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 using Doner.Resources;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Localization;
 
 namespace Doner.Features.WorkspaceFeature;
 
 public abstract class WorkspaceEndpointMapper: IEndpointMapper
 {
+    private const string WorkspaceNotFound = "A workspace with this name already exists.";
+    private const string WorkspaceNameRequired = "Workspace name is required.";
+    private const string WorkspaceAlreadyExists = "A workspace with this name already exists.";
+    
     public static void Map(IEndpointRouteBuilder builder)
     {
         var workspacesGroup = builder.MapGroup("/users/me/workspaces").RequireAuthorization();
@@ -20,7 +23,7 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
         workspacesGroup.MapGet("/", GetByOwnerAsync);
         workspacesGroup.MapGet("/{id:guid}", GetWorkspace);
         workspacesGroup.MapPost("/", AddWorkspace);
-        workspacesGroup.MapPut("/", UpdateWorkspace);
+        workspacesGroup.MapPut("/{id:guid}", UpdateWorkspace);
         workspacesGroup.MapDelete("/{id:guid}", RemoveWorkspace);
     }
 
@@ -39,7 +42,6 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
 
     private static async Task<Results<NotFound<string>, Ok<WorkspaceResponse>>> GetWorkspace(
         [FromServices] IWorkspaceService workspaceService,
-        [FromServices] IStringLocalizer<WorkspaceEndpointMapper> localizer,
         [FromRoute] Guid id
         )
     {
@@ -50,14 +52,13 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
                 workspace => TypedResults.Ok(workspace.ToResponse()), 
                 exception => exception switch
                 {
-                    WorkspaceNotFoundException => TypedResults.NotFound(localizer["WorkspaceNotFound"].Value),
+                    WorkspaceNotFoundException => TypedResults.NotFound(WorkspaceNotFound),
                     _ => throw exception
                 });
     }
     
     private static async Task<Results<BadRequest<string>, NotFound<string>, Created>> AddWorkspace(
         [FromServices] IWorkspaceService workspaceService,
-        [FromServices] IStringLocalizer<WorkspaceEndpointMapper> localizer,
         [FromBody] AddWorkspaceRequest request,
         ClaimsPrincipal user
         )
@@ -72,8 +73,8 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
             workspaceId => TypedResults.Created(workspaceId.ToString()),
             exception => exception switch
             {
-                WorkspaceNameRequiredException => TypedResults.BadRequest(localizer["WorkspaceNameRequired"].Value),
-                WorkspaceAlreadyExistsException => TypedResults.BadRequest(localizer["WorkspaceAlreadyExists"].Value),
+                WorkspaceNameRequiredException => TypedResults.BadRequest(WorkspaceNameRequired),
+                WorkspaceAlreadyExistsException => TypedResults.BadRequest(WorkspaceAlreadyExists),
                 _ => throw exception
             }
         );
@@ -81,8 +82,6 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
 
     private static async Task<Results<NoContent, BadRequest<string>, NotFound<string>>> UpdateWorkspace(
         [FromServices] IWorkspaceService workspaceService,
-        [FromServices] IStringLocalizer<WorkspaceEndpointMapper> localizer,
-        [FromServices] IStringLocalizer<SharedResources> sharedLocalizer,
         [FromBody] UpdateWorkspaceRequest request,
         ClaimsPrincipal user,
         Guid id
@@ -95,17 +94,15 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
             _ => TypedResults.NoContent(),
             exception => exception switch
             {
-                WorkspaceNotFoundException => TypedResults.NotFound(localizer["WorkspaceNotFound"].Value),
-                PermissionDeniedException => TypedResults.BadRequest(sharedLocalizer["PermissionDenied"].Value),
-                WorkspaceAlreadyExistsException => TypedResults.BadRequest(localizer["WorkspaceAlreadyExists"].Value),
+                WorkspaceNotFoundException => TypedResults.NotFound(WorkspaceNotFound),
+                PermissionDeniedException => TypedResults.BadRequest(SharedResources.PermissionDenied),
+                WorkspaceAlreadyExistsException => TypedResults.BadRequest(WorkspaceAlreadyExists),
                 _ => throw exception
             });
     }
     
     private static async Task<Results<NotFound<string>, NoContent, BadRequest<string>>> RemoveWorkspace(
         [FromServices] IWorkspaceService workspaceService,
-        [FromServices] IStringLocalizer<WorkspaceEndpointMapper> localizer,
-        [FromServices] IStringLocalizer<SharedResources> sharedLocalizer,
         [FromRoute] Guid id,
         ClaimsPrincipal user
     )
@@ -118,8 +115,8 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
             {
                 return exception switch
                 {
-                    WorkspaceNotFoundException => TypedResults.NotFound(localizer["WorkspaceNotFound"].Value),
-                    PermissionDeniedException => TypedResults.BadRequest(sharedLocalizer["PermissionDenied"].Value),
+                    WorkspaceNotFoundException => TypedResults.NotFound(WorkspaceNotFound),
+                    PermissionDeniedException => TypedResults.BadRequest(SharedResources.PermissionDenied),
                     _ => throw exception
                 };
             }

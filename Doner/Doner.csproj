@@ -23,4 +23,8 @@
       <ProjectReference Include="..\Doner.Contracts\Doner.Contracts.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Compile Remove="Localizer\Messages.cs" />
+    </ItemGroup>
+
 </Project>

@@ -8,6 +8,4 @@ public class WorkspaceResponse
     public string? Description { get; set; }
     
     public Guid OwnerId { get; set; }
-    
-    public bool IsArchived { get; set; }
 }

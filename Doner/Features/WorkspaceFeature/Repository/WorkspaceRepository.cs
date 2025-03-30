@@ -11,7 +11,7 @@ public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactor
         await using var context = await dbContextFactory.CreateDbContextAsync();
         
         return context.Workspaces
-            .Where(w => w.OwnerId == ownerId);
+            .Where(w => w.OwnerId == ownerId).ToArray();
     }
 
     public override async Task<Workspace?> GetAsync(Guid id)
@@ -42,7 +42,8 @@ public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactor
             return;
         }
 
-        context.Entry(entity).CurrentValues.SetValues(workspace);
+        entity.Name = workspace.Name;
+        entity.Description = workspace.Description;
         
         await context.SaveChangesAsync();
     }

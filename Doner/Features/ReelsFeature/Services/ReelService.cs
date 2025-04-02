@@ -59,6 +59,8 @@ public class ReelService : IReelService
             throw new UnauthorizedAccessException();
         }
 
+        reel.WorkspaceId = existingReel.WorkspaceId;
+
         await _reelValidator.ValidateAndThrowAsync(reel, cancellationToken);
 
 

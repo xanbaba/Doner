@@ -2,17 +2,18 @@
 using Contracts.V1.Requests;
 using Contracts.V1.Responses;
 using Doner.Features.ReelsFeature.Services;
-using Doner.Localizer;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Localization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Doner.Features.ReelsFeature;
 
 public class ReelEndpointMapper : IEndpointMapper
 {
+    private const string ReelNotFound = "Reel not found.";
+    
     public static void Map(IEndpointRouteBuilder builder)
     {
-        var authGroup = builder.MapGroup("/").RequireAuthorization();
+        var authGroup = builder.MapGroup("/users").RequireAuthorization();
         authGroup.MapGet("/me/workspaces/{workspaceId:guid}/reels", GetReels);
         authGroup.MapGet("/me/reels/{reelId:guid}", GetReelById).WithName(nameof(GetReelById));
         authGroup.MapPost("/me/workspaces/{workspaceId:guid}/reels", AddReel);
@@ -22,8 +23,8 @@ public class ReelEndpointMapper : IEndpointMapper
 
     private static async Task<Results<NotFound, NoContent, ForbidHttpResult>> DeleteReel
     (
-        Guid reelId,
-        IReelService reelService,
+        [FromRoute] Guid reelId,
+        [FromServices] IReelService reelService,
         ClaimsPrincipal user,
         CancellationToken cancellationToken
     )
@@ -45,15 +46,16 @@ public class ReelEndpointMapper : IEndpointMapper
 
     private static async Task<Results<NotFound, NoContent, ForbidHttpResult>> UpdateReel
     (
-        Guid reelId,
-        UpdateReelRequest request,
-        IReelService reelService,
-        ClaimsPrincipal user
+        [FromRoute] Guid reelId,
+        [FromBody] UpdateReelRequest request,
+        [FromServices] IReelService reelService,
+        ClaimsPrincipal user,
+        CancellationToken cancellationToken
     )
     {
         try
         {
-            if (!await reelService.UpdateAsync(request.ToReel(reelId, user.GetUserId())))
+            if (!await reelService.UpdateAsync(request.ToReel(reelId, user.GetUserId()), cancellationToken))
             {
                 return TypedResults.NotFound();
             }
@@ -67,24 +69,22 @@ public class ReelEndpointMapper : IEndpointMapper
 
     private static async Task<CreatedAtRoute<ReelResponse>> AddReel
     (
-        AddReelRequest request,
-        IReelService reelService,
+        [FromBody] AddReelRequest request,
+        [FromServices] IReelService reelService,
         ClaimsPrincipal user,
-        Guid workspaceId,
-        IStringLocalizer<Messages> localizer,
+        [FromRoute] Guid workspaceId,
         CancellationToken cancellationToken
     )
     {
-        var reel = request.ToReel(workspaceId, user.GetUserId());
+        var reel = request.ToReel(user.GetUserId(), workspaceId);
         await reelService.AddAsync(reel, cancellationToken);
         return TypedResults.CreatedAtRoute(reel.ToResponse(), nameof(GetReelById), new { reelId = reel.Id });
     }
 
     private static async Task<Results<NotFound<string>, Ok<ReelResponse>, ForbidHttpResult>> GetReelById
     (
-        Guid reelId,
-        IReelService reelService,
-        IStringLocalizer<Messages> localizer,
+        [FromRoute] Guid reelId,
+        [FromServices] IReelService reelService,
         ClaimsPrincipal user,
         CancellationToken cancellationToken
     )
@@ -94,7 +94,7 @@ public class ReelEndpointMapper : IEndpointMapper
             var reel = await reelService.GetByIdAsync(reelId, user.GetUserId(), cancellationToken);
             if (reel is null)
             {
-                return TypedResults.NotFound(localizer["ReelNotFound"].Value);
+                return TypedResults.NotFound(ReelNotFound);
             }
 
             return TypedResults.Ok(reel.ToResponse());
@@ -107,10 +107,10 @@ public class ReelEndpointMapper : IEndpointMapper
 
     private static async Task<Results<Ok<ReelsResponse>, ForbidHttpResult>> GetReels
     (
-        GetReelsRequest request,
-        IReelService reelService,
+        [AsParameters] GetReelsRequest request,
+        [FromServices] IReelService reelService,
         ClaimsPrincipal user,
-        Guid workspaceId,
+        [FromRoute] Guid workspaceId,
         CancellationToken cancellationToken
     )
     {

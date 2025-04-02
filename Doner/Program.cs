@@ -29,10 +29,12 @@ public class Program
 
         var app = builder.Build();
 
-        app.MigrateDatabase<AppDbContext>();
-
-        // app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureDeleted();
-        // app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
+        if (!app.Environment.IsEnvironment("Testing"))
+        {
+            app.MigrateDatabase<AppDbContext>();
+            // app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureDeleted();
+            // app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
+        }
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())

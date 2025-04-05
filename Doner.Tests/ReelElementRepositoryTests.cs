@@ -76,13 +76,13 @@ public class ReelElementRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task AddReelElementAsync_ShouldAddElement()
+    public async Task AppendReelElementAsync_ShouldAddElement()
     {
         var reel = CreateTestReel();
         await _collection.InsertOneAsync(reel);
 
         var element = CreateTestReelElement();
-        var result = await _repository.AddReelElementAsync(reel.Id, element);
+        var result = await _repository.AppendReelElementAsync(reel.Id, element);
 
         result.Should().NotBeNull();
         result.Id.Should().Be(element.Id);
@@ -145,6 +145,64 @@ public class ReelElementRepositoryTests : IDisposable
 
         var success = await _repository.DeleteReelElementAsync(reel.Id, Guid.NewGuid());
         success.Should().BeFalse();
+    }
+    
+    [Fact]
+    public async Task InsertReelElementAsync_ShouldInsertElement()
+    {
+        var reel = CreateTestReel();
+        var existingElement = CreateTestReelElement();
+        reel.ReelElements = new List<ReelElement> { existingElement };
+        await _collection.InsertOneAsync(reel);
+    
+        var newElement = CreateTestReelElement();
+        var result = await _repository.InsertReelElementAsync(reel.Id, existingElement.Id, newElement);
+    
+        result.Should().NotBeNull();
+        result.Id.Should().Be(newElement.Id);
+    
+        var updatedReel = await _collection.Find(r => r.Id == reel.Id).FirstOrDefaultAsync();
+        updatedReel!.ReelElements.Should().Contain(e => e.Id == newElement.Id);
+        var existingElementIndex = updatedReel.ReelElements.FindIndex(e => e.Id == existingElement.Id);
+        var newElementIndex = updatedReel.ReelElements.FindIndex(e => e.Id == newElement.Id);
+        newElementIndex.Should().Be(existingElementIndex + 1);
+    }
+    
+    [Fact]
+    public async Task InsertReelElementAsync_ShouldReturnNull_WhenInsertAfterElementNotFound()
+    {
+        var reel = CreateTestReel();
+        await _collection.InsertOneAsync(reel);
+    
+        var newElement = CreateTestReelElement();
+        var result = await _repository.InsertReelElementAsync(reel.Id, Guid.NewGuid(), newElement);
+    
+        result.Should().BeNull();
+    }
+    
+    [Fact]
+    public async Task PrependReelElementAsync_ShouldPrependElement()
+    {
+        var reel = CreateTestReel();
+        await _collection.InsertOneAsync(reel);
+    
+        var element = CreateTestReelElement();
+        var result = await _repository.PrependReelElementAsync(reel.Id, element);
+    
+        result.Should().NotBeNull();
+        result.Id.Should().Be(element.Id);
+    
+        var updatedReel = await _collection.Find(r => r.Id == reel.Id).FirstOrDefaultAsync();
+        updatedReel!.ReelElements.First().Id.Should().Be(element.Id);
+    }
+    
+    [Fact]
+    public async Task PrependReelElementAsync_ShouldReturnNull_WhenReelNotFound()
+    {
+        var element = CreateTestReelElement();
+        var result = await _repository.PrependReelElementAsync(Guid.NewGuid(), element);
+    
+        result.Should().BeNull();
     }
 
     private Reel CreateTestReel()

@@ -1,6 +1,7 @@
 using Doner.Features.ReelsFeature.Repository;
 using Doner.Features.ReelsFeature.Services;
 using FluentValidation;
+using Microsoft.AspNetCore.Http.Json;
 using MongoDB.Driver;
 
 namespace Doner.Features.ReelsFeature;
@@ -18,10 +19,16 @@ public class ReelsFeature: IFeature
         builder.Services.AddTransient<IReelRepository, ReelRepository>();
         builder.Services.AddTransient<IReelService, ReelService>();
 
+        builder.Services.Configure<JsonOptions>(options =>
+        {
+            options.SerializerOptions.Converters.Add(new AddReelElementConverter());
+            options.SerializerOptions.Converters.Add(new UpdateReelElementConverter());
+        });
     }
 
     public static void Configure(WebApplication app)
     {
         app.MapGroup("/api/v1").MapEndpoints<ReelEndpointMapper>();
+        app.MapGroup("/api/v1").MapEndpoints<ReelElementEndpointMapper>();
     }
 }

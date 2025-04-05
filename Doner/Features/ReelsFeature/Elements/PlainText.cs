@@ -5,5 +5,5 @@ namespace Doner.Features.ReelsFeature.Elements;
 [BsonDiscriminator(nameof(PlainText))]
 public class PlainText : ReelElement
 {
-    public string Text { get; set; } = string.Empty;
+    public required string Text { get; set; }
 }

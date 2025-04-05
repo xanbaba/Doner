@@ -2,6 +2,7 @@ using Doner.DataBase;
 using Doner.Features.AuthFeature;
 using Doner.Features.ReelsFeature;
 using Doner.Features.WorkspaceFeature;
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
 namespace Doner;
@@ -26,6 +27,7 @@ public class Program
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             optionsBuilder.UseSqlServer(connectionString);
         });
+        builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
         var app = builder.Build();
 

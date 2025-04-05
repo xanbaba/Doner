@@ -6,5 +6,5 @@ namespace Doner.Features.ReelsFeature.Elements;
 public class Checkbox : ReelElement
 {
     public bool IsChecked { get; set; }
-    public string Header { get; set; } = string.Empty;
+    public required string Header { get; set; }
 }

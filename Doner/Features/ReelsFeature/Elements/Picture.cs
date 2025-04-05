@@ -5,8 +5,8 @@ namespace Doner.Features.ReelsFeature.Elements;
 [BsonDiscriminator(nameof(Picture))]
 public class Picture : ReelElement
 {
-    public string Url { get; set; } = string.Empty;
+    public required string Url { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
-    public string Caption { get; set; } = string.Empty;
+    public string? Caption { get; set; }
 }

@@ -17,7 +17,7 @@ public class ReelsFeature: IFeature
 
         builder.Services.AddTransient<IReelRepository, ReelRepository>();
         builder.Services.AddTransient<IReelService, ReelService>();
-        builder.Services.AddScoped<IValidator<Reel>, ReelValidator>();
+
     }
 
     public static void Configure(WebApplication app)

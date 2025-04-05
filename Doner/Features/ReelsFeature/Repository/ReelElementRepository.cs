@@ -24,7 +24,7 @@ public class ReelElementRepository : IReelElementRepository
         return reel?.ReelElements ?? [];
     }
 
-    public async Task<ReelElement?> AddReelElementAsync(Guid reelId, ReelElement reelElement)
+    public async Task<ReelElement?> AppendReelElementAsync(Guid reelId, ReelElement reelElement)
     {
         var update = Builders<Reel>.Update.Push(r => r.ReelElements, reelElement);
         var result = await _reelsMongoCollection.FindOneAndUpdateAsync(r => r.Id == reelId, update, new FindOneAndUpdateOptions<Reel>
@@ -62,5 +62,33 @@ public class ReelElementRepository : IReelElementRepository
         );
 
         return result.ModifiedCount > 0;
+    }
+    
+    public async Task<ReelElement?> InsertReelElementAsync(Guid reelId, Guid insertAfterElementId, ReelElement reelElement)
+    {
+        var filter = Builders<Reel>.Filter.And(
+            Builders<Reel>.Filter.Eq(r => r.Id, reelId),
+            Builders<Reel>.Filter.ElemMatch(r => r.ReelElements, e => e.Id == insertAfterElementId)
+        );
+
+        var update = Builders<Reel>.Update.PushEach(r => r.ReelElements, [reelElement], position: 1);
+
+        var options = new FindOneAndUpdateOptions<Reel>
+        {
+            ReturnDocument = ReturnDocument.After
+        };
+
+        var result = await _reelsMongoCollection.FindOneAndUpdateAsync(filter, update, options);
+        return result?.ReelElements.FirstOrDefault(e => e.Id == reelElement.Id);
+    }
+
+    public async Task<ReelElement?> PrependReelElementAsync(Guid reelId, ReelElement reelElement)
+    {
+        var update = Builders<Reel>.Update.PushEach(r => r.ReelElements, [reelElement], position: 0);
+        var result = await _reelsMongoCollection.FindOneAndUpdateAsync(r => r.Id == reelId, update, new FindOneAndUpdateOptions<Reel>
+        {
+            ReturnDocument = ReturnDocument.After
+        });
+        return result?.ReelElements.FirstOrDefault(e => e.Id == reelElement.Id);
     }
 }

@@ -10,7 +10,7 @@ namespace Doner.Tests;
 public class ReelElementRepositoryTests : IDisposable
 {
     private readonly MongoDbRunner _runner;
-    private readonly ReelElementRepository _repository;
+    private readonly ReelRepository _repository;
     private readonly IMongoCollection<Reel> _collection;
 
     public ReelElementRepositoryTests()
@@ -20,7 +20,7 @@ public class ReelElementRepositoryTests : IDisposable
         var database = client.GetDatabase("DonerTestDb");
 
         _collection = database.GetCollection<Reel>("Reels");
-        _repository = new ReelElementRepository(_collection);
+        _repository = new ReelRepository(_collection);
     }
 
     [Fact]
@@ -100,7 +100,7 @@ public class ReelElementRepositoryTests : IDisposable
         await _collection.InsertOneAsync(reel);
 
         element.Text = "Updated Text";
-        var result = await _repository.UpdateReelElementAsync(reel.Id, element.Id, element);
+        var result = await _repository.UpdateReelElementAsync(reel.Id, element);
 
         result.Should().NotBeNull();
         result.Should().BeOfType<PlainText>();
@@ -117,7 +117,7 @@ public class ReelElementRepositoryTests : IDisposable
         await _collection.InsertOneAsync(reel);
 
         var element = CreateTestReelElement();
-        var result = await _repository.UpdateReelElementAsync(reel.Id, element.Id, element);
+        var result = await _repository.UpdateReelElementAsync(reel.Id, element);
 
         result.Should().BeNull();
     }

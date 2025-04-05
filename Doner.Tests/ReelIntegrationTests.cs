@@ -1,26 +1,27 @@
 ﻿using Doner.Features.ReelsFeature;
+using Doner.Features.ReelsFeature.Elements;
 using Doner.Features.ReelsFeature.Repository;
 using Doner.Features.ReelsFeature.Services;
+using Doner.Features.ReelsFeature.Validation;
 using Doner.Features.WorkspaceFeature.Entities;
+using Doner.Features.WorkspaceFeature.Repository;
 using Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 using FluentAssertions;
 using FluentValidation;
-using LanguageExt.Common;
 using Mongo2Go;
 using MongoDB.Driver;
-using Moq;
 using SearchOption = Contracts.V1.SearchOption;
 
 namespace Doner.Tests;
 
-public class ReelServiceIntegrationTests : IDisposable
+public class ReelIntegrationTests : IDisposable
 {
     private readonly MongoDbRunner _runner;
     private readonly IMongoCollection<Reel> _reelCollection;
     private readonly ReelService _reelService;
-    private readonly Mock<IWorkspaceService> _workspaceServiceMock;
+    private readonly WorkspaceService _workspaceService;
 
-    public ReelServiceIntegrationTests()
+    public ReelIntegrationTests()
     {
         _runner = MongoDbRunner.Start();
         var client = new MongoClient(_runner.ConnectionString);
@@ -29,8 +30,17 @@ public class ReelServiceIntegrationTests : IDisposable
 
         var reelRepository = new ReelRepository(_reelCollection);
         IValidator<Reel> reelValidator = new ReelValidator();
-        _workspaceServiceMock = new Mock<IWorkspaceService>();
-        _reelService = new ReelService(reelRepository, reelValidator, _workspaceServiceMock.Object);
+        IValidator<ReelElement> reelElementValidator = new CompositeReelElementValidator
+        (
+            new PictureValidator(),
+            new CheckboxValidator(),
+            new DropdownValidator(),
+            new PlainTextValidator()
+        );
+        var appDbContextFactory = new AppDbContextFactory();
+        var workspaceRepository = new WorkspaceRepository(appDbContextFactory);
+        _workspaceService = new WorkspaceService(workspaceRepository);
+        _reelService = new ReelService(reelRepository, reelValidator, reelElementValidator, _workspaceService);
     }
 
     [Fact]
@@ -146,13 +156,20 @@ public class ReelServiceIntegrationTests : IDisposable
     [Fact]
     public async Task GetByWorkspaceAsync_ShouldReturnReels_WhenUserIsWorkspaceOwner()
     {
-        var workspaceId = Guid.NewGuid();
         var userId = Guid.NewGuid();
+        var workspace = new Workspace
+        {
+            Name = "Test Workspace",
+            OwnerId = userId
+        };
+        var createResult = await _workspaceService.CreateAsync(workspace);
+        _ = createResult.IfFail(e => throw e);
+        Guid? workspaceId = null;
+        createResult.IfSucc(g => workspaceId = g);
         var reels = new List<Reel> { CreateTestReel(workspaceId: workspaceId, ownerId: userId) };
         await _reelCollection.InsertManyAsync(reels);
-        _workspaceServiceMock.Setup(w => w.GetAsync(workspaceId)).ReturnsAsync(new Result<Workspace>(new Workspace { OwnerId = userId }));
 
-        var result = await _reelService.GetByWorkspaceAsync(workspaceId, userId);
+        var result = await _reelService.GetByWorkspaceAsync(workspaceId!.Value, userId);
 
         result.Should().BeEquivalentTo(reels);
     }
@@ -160,11 +177,18 @@ public class ReelServiceIntegrationTests : IDisposable
     [Fact]
     public async Task GetByWorkspaceAsync_ShouldThrowUnauthorizedAccessException_WhenUserIsNotWorkspaceOwner()
     {
-        var workspaceId = Guid.NewGuid();
         var userId = Guid.NewGuid();
-        _workspaceServiceMock.Setup(w => w.GetAsync(workspaceId)).ReturnsAsync(new Result<Workspace>(new Workspace { OwnerId = Guid.NewGuid() }));
+        var workspace = new Workspace
+        {
+            Name = "Test Workspace",
+            OwnerId = userId
+        };
+        var createResult = await _workspaceService.CreateAsync(workspace);
+        _ = createResult.IfFail(e => throw e);
+        Guid? workspaceId = null;
+        createResult.IfSucc(g => workspaceId = g);
 
-        Func<Task> act = async () => await _reelService.GetByWorkspaceAsync(workspaceId, userId);
+        Func<Task> act = async () => await _reelService.GetByWorkspaceAsync(workspaceId!.Value, Guid.NewGuid());
 
         await act.Should().ThrowAsync<UnauthorizedAccessException>();
     }

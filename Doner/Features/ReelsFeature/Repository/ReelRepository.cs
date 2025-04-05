@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Doner.Features.ReelsFeature.Elements;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using SearchOption = Contracts.V1.SearchOption;
@@ -63,5 +64,85 @@ public class ReelRepository : IReelRepository
         return await _reelsMongoCollection
             .Find(filter)
             .ToListAsync(cancellationToken);
+    }
+    
+    public async Task<ReelElement?> GetReelElementAsync(Guid reelId, Guid elementId, CancellationToken cancellationToken = default)
+    {
+        var reel = await _reelsMongoCollection.Find(r => r.Id == reelId).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        return reel?.ReelElements.FirstOrDefault(e => e.Id == elementId);
+    }
+
+    public async Task<IEnumerable<ReelElement>> GetReelElementsAsync(Guid reelId, CancellationToken cancellationToken = default)
+    {
+        var reel = await _reelsMongoCollection.Find(r => r.Id == reelId).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        return reel?.ReelElements ?? [];
+    }
+
+    public async Task<ReelElement?> AppendReelElementAsync(Guid reelId, ReelElement reelElement, CancellationToken cancellationToken = default)
+    {
+        var update = Builders<Reel>.Update.Push(r => r.ReelElements, reelElement);
+        var result = await _reelsMongoCollection.FindOneAndUpdateAsync(r => r.Id == reelId, update, new FindOneAndUpdateOptions<Reel>
+        {
+            ReturnDocument = ReturnDocument.After
+        }, cancellationToken: cancellationToken);
+        return result?.ReelElements.FirstOrDefault(e => e.Id == reelElement.Id);
+    }
+
+    public async Task<ReelElement?> UpdateReelElementAsync(Guid reelId, ReelElement reelElement, CancellationToken cancellationToken = default)
+    {
+        var elementId = reelElement.Id;
+        var filter = Builders<Reel>.Filter.And(
+            Builders<Reel>.Filter.Eq(r => r.Id, reelId),
+            Builders<Reel>.Filter.ElemMatch(r => r.ReelElements, e => e.Id == elementId)
+        );
+
+        var update = Builders<Reel>.Update.Set("ReelElements.$", reelElement);
+
+        var options = new FindOneAndUpdateOptions<Reel>
+        {
+            ReturnDocument = ReturnDocument.After
+        };
+
+        var result = await _reelsMongoCollection.FindOneAndUpdateAsync(filter, update, options, cancellationToken);
+        return result?.ReelElements.FirstOrDefault(e => e.Id == elementId);
+    }
+
+
+    public async Task<bool> DeleteReelElementAsync(Guid reelId, Guid elementId, CancellationToken cancellationToken = default)
+    {
+        var update = Builders<Reel>.Update.PullFilter(r => r.ReelElements, e => e.Id == elementId);
+        var result = await _reelsMongoCollection.UpdateOneAsync(
+            r => r.Id == reelId && r.ReelElements.Any(e => e.Id == elementId),
+            update, cancellationToken: cancellationToken);
+
+        return result.ModifiedCount > 0;
+    }
+    
+    public async Task<ReelElement?> InsertReelElementAsync(Guid reelId, Guid insertAfterElementId, ReelElement reelElement, CancellationToken cancellationToken = default)
+    {
+        var filter = Builders<Reel>.Filter.And(
+            Builders<Reel>.Filter.Eq(r => r.Id, reelId),
+            Builders<Reel>.Filter.ElemMatch(r => r.ReelElements, e => e.Id == insertAfterElementId)
+        );
+
+        var update = Builders<Reel>.Update.PushEach(r => r.ReelElements, [reelElement], position: 1);
+
+        var options = new FindOneAndUpdateOptions<Reel>
+        {
+            ReturnDocument = ReturnDocument.After
+        };
+
+        var result = await _reelsMongoCollection.FindOneAndUpdateAsync(filter, update, options, cancellationToken);
+        return result?.ReelElements.FirstOrDefault(e => e.Id == reelElement.Id);
+    }
+
+    public async Task<ReelElement?> PrependReelElementAsync(Guid reelId, ReelElement reelElement, CancellationToken cancellationToken = default)
+    {
+        var update = Builders<Reel>.Update.PushEach(r => r.ReelElements, [reelElement], position: 0);
+        var result = await _reelsMongoCollection.FindOneAndUpdateAsync(r => r.Id == reelId, update, new FindOneAndUpdateOptions<Reel>
+        {
+            ReturnDocument = ReturnDocument.After
+        }, cancellationToken: cancellationToken);
+        return result?.ReelElements.FirstOrDefault(e => e.Id == reelElement.Id);
     }
 }

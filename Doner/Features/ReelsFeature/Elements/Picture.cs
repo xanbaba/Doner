@@ -6,7 +6,7 @@ namespace Doner.Features.ReelsFeature.Elements;
 public class Picture : ReelElement
 {
     public required string Url { get; set; }
-    public int Width { get; set; }
-    public int Height { get; set; }
+    public required int Width { get; set; }
+    public required int Height { get; set; }
     public string? Caption { get; set; }
 }

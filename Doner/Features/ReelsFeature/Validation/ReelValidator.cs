@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace Doner.Features.ReelsFeature.Services;
+namespace Doner.Features.ReelsFeature.Validation;
 
 public class ReelValidator : AbstractValidator<Reel>
 {

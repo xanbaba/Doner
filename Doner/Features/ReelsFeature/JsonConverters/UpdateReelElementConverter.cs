@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Contracts.V1.Requests;
 
-namespace Doner.Features.ReelsFeature;
+namespace Doner.Features.ReelsFeature.JsonConverters;
 
 public class UpdateReelElementConverter : JsonConverter<UpdateReelElementRequest>
 {
@@ -13,7 +13,7 @@ public class UpdateReelElementConverter : JsonConverter<UpdateReelElementRequest
 
         JsonElement? typeProperty = null;
         
-        foreach (var property in root.EnumerateObject().Where(element => string.Equals(element.Name, "type", StringComparison.OrdinalIgnoreCase)))
+        foreach (var property in root.EnumerateObject().Where(element => string.Equals(element.Name, nameof(UpdateReelElementRequest.ElementType), StringComparison.OrdinalIgnoreCase)))
         {
             typeProperty = property.Value;
             break;
@@ -21,14 +21,14 @@ public class UpdateReelElementConverter : JsonConverter<UpdateReelElementRequest
 
         if (typeProperty is null)
         {
-            throw new JsonException("Missing type property.");
+            throw new JsonException($"Missing {nameof(UpdateReelElementRequest.ElementType)} property.");
         }
 
 
         var type = typeProperty.Value.GetString();
         if (!Enum.TryParse<ReelElementType>(type, true, out var reelElementType))
         {
-            throw new JsonException($"Unknown type: {type}");
+            throw new JsonException($"Unknown {nameof(UpdateReelElementRequest.ElementType)}: {type}");
         }
 
         UpdateReelElementRequest? request = reelElementType switch
@@ -50,6 +50,6 @@ public class UpdateReelElementConverter : JsonConverter<UpdateReelElementRequest
 
     public override void Write(Utf8JsonWriter writer, UpdateReelElementRequest value, JsonSerializerOptions options)
     {
-        JsonSerializer.Serialize(writer, (object)value, options);
+        JsonSerializer.Serialize<object>(writer, value, options);
     }
 }

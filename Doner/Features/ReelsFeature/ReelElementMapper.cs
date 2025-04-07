@@ -1,13 +1,13 @@
 using Contracts.V1.Requests;
+using Contracts.V1.Responses;
 using Doner.Features.ReelsFeature.Elements;
 
 namespace Doner.Features.ReelsFeature;
 
 public static class ReelElementMapper
 {
-    public static ReelElement ToReelElement(this AddReelElementRequest addRequest)
-    {
-        return addRequest switch
+    public static ReelElement ToReelElement(this AddReelElementRequest addRequest) =>
+        addRequest switch
         {
             AddCheckboxRequest checkboxRequest => new Checkbox
             {
@@ -34,11 +34,9 @@ public static class ReelElementMapper
             },
             _ => throw new ArgumentOutOfRangeException(nameof(addRequest), addRequest, null)
         };
-    }
-    
-    public static ReelElement ToReelElement(this UpdateReelElementRequest updateRequest)
-    {
-        return updateRequest switch
+
+    public static ReelElement ToReelElement(this UpdateReelElementRequest updateRequest) =>
+        updateRequest switch
         {
             UpdateCheckboxRequest checkboxRequest => new Checkbox
             {
@@ -65,5 +63,40 @@ public static class ReelElementMapper
             },
             _ => throw new ArgumentOutOfRangeException(nameof(updateRequest), updateRequest, null)
         };
-    }
+
+    public static ReelElementsResponse ToResponse(this IEnumerable<ReelElement> elements) =>
+        new()
+        {
+            Items = elements.Select(e => e.ToResponse()).ToList()
+        };
+
+    public static ReelElementResponse ToResponse(this ReelElement element) =>
+        element switch
+        {
+            Checkbox checkbox => new CheckboxResponse
+            {
+                Id = checkbox.Id,
+                Header = checkbox.Header,
+                IsChecked = checkbox.IsChecked
+            },
+            Dropdown dropdown => new DropdownResponse
+            {
+                Id = dropdown.Id,
+                Elements = dropdown.Elements.Select(e => e.ToResponse()).ToList()
+            },
+            Picture picture => new PictureResponse
+            {
+                Id = picture.Id,
+                Url = picture.Url,
+                Width = picture.Width,
+                Height = picture.Height,
+                Caption = picture.Caption
+            },
+            PlainText plainText => new PlainTextResponse
+            {
+                Id = plainText.Id,
+                Text = plainText.Text
+            },
+            _ => throw new ArgumentOutOfRangeException(nameof(element), element, null)
+        };
 }

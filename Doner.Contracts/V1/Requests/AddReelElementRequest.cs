@@ -2,7 +2,13 @@ namespace Contracts.V1.Requests;
 
 public abstract class AddReelElementRequest
 {
-    public ReelElementType Type { get; set; }
+    public required ReelElementType ElementType { get; set; }
+    public required AddType AddType { get; set; }
+    /// <summary>
+    /// The ID of the element after which the new element should be inserted.
+    /// Present only if AddType is InsertAfter.
+    /// </summary>
+    public Guid? InsertAfterId { get; set; }
 }
 
 public class AddCheckboxRequest : AddReelElementRequest

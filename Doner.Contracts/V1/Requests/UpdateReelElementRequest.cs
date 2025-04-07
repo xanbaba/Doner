@@ -2,13 +2,13 @@ namespace Contracts.V1.Requests;
 
 public abstract class UpdateReelElementRequest
 {
-    public ReelElementType Type { get; set; }
+    public required ReelElementType ElementType { get; set; }
 }
 
 public class UpdateCheckboxRequest : UpdateReelElementRequest
 {
     public required bool IsChecked { get; set; }
-    public string? Header { get; set; }
+    public required string Header { get; set; }
 }
 
 public class UpdateDropdownRequest : UpdateReelElementRequest

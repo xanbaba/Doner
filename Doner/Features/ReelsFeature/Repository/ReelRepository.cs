@@ -38,13 +38,16 @@ public class ReelRepository : IReelRepository
 
     public async Task<bool> DeleteAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _reelsMongoCollection.FindOneAndDeleteAsync(r => r.Id == id, cancellationToken: cancellationToken) != null;
+        return await _reelsMongoCollection.FindOneAndDeleteAsync(r => r.Id == id,
+            cancellationToken: cancellationToken) != null;
     }
 
     public async Task<IEnumerable<Reel>> GetByWorkspaceAsync(Guid workspaceId,
         CancellationToken cancellationToken = default)
     {
-        var result = await _reelsMongoCollection.FindAsync(r => r.WorkspaceId == workspaceId, cancellationToken: cancellationToken);
+        var result =
+            await _reelsMongoCollection.FindAsync(r => r.WorkspaceId == workspaceId,
+                cancellationToken: cancellationToken);
         return result.ToList(cancellationToken: cancellationToken);
     }
 
@@ -65,30 +68,37 @@ public class ReelRepository : IReelRepository
             .Find(filter)
             .ToListAsync(cancellationToken);
     }
-    
-    public async Task<ReelElement?> GetReelElementAsync(Guid reelId, Guid elementId, CancellationToken cancellationToken = default)
+
+    public async Task<ReelElement?> GetReelElementAsync(Guid reelId, Guid elementId,
+        CancellationToken cancellationToken = default)
     {
-        var reel = await _reelsMongoCollection.Find(r => r.Id == reelId).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        var reel = await _reelsMongoCollection.Find(r => r.Id == reelId)
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
         return reel?.ReelElements.FirstOrDefault(e => e.Id == elementId);
     }
 
-    public async Task<IEnumerable<ReelElement>> GetReelElementsAsync(Guid reelId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<ReelElement>> GetReelElementsAsync(Guid reelId,
+        CancellationToken cancellationToken = default)
     {
-        var reel = await _reelsMongoCollection.Find(r => r.Id == reelId).FirstOrDefaultAsync(cancellationToken: cancellationToken);
+        var reel = await _reelsMongoCollection.Find(r => r.Id == reelId)
+            .FirstOrDefaultAsync(cancellationToken: cancellationToken);
         return reel?.ReelElements ?? [];
     }
 
-    public async Task<ReelElement?> AppendReelElementAsync(Guid reelId, ReelElement reelElement, CancellationToken cancellationToken = default)
+    public async Task<ReelElement?> AppendReelElementAsync(Guid reelId, ReelElement reelElement,
+        CancellationToken cancellationToken = default)
     {
         var update = Builders<Reel>.Update.Push(r => r.ReelElements, reelElement);
-        var result = await _reelsMongoCollection.FindOneAndUpdateAsync(r => r.Id == reelId, update, new FindOneAndUpdateOptions<Reel>
-        {
-            ReturnDocument = ReturnDocument.After
-        }, cancellationToken: cancellationToken);
+        var result = await _reelsMongoCollection.FindOneAndUpdateAsync(r => r.Id == reelId, update,
+            new FindOneAndUpdateOptions<Reel>
+            {
+                ReturnDocument = ReturnDocument.After
+            }, cancellationToken: cancellationToken);
         return result?.ReelElements.FirstOrDefault(e => e.Id == reelElement.Id);
     }
 
-    public async Task<ReelElement?> UpdateReelElementAsync(Guid reelId, ReelElement reelElement, CancellationToken cancellationToken = default)
+    public async Task<ReelElement?> UpdateReelElementAsync(Guid reelId, ReelElement reelElement,
+        CancellationToken cancellationToken = default)
     {
         var elementId = reelElement.Id;
         var filter = Builders<Reel>.Filter.And(
@@ -108,7 +118,8 @@ public class ReelRepository : IReelRepository
     }
 
 
-    public async Task<bool> DeleteReelElementAsync(Guid reelId, Guid elementId, CancellationToken cancellationToken = default)
+    public async Task<bool> DeleteReelElementAsync(Guid reelId, Guid elementId,
+        CancellationToken cancellationToken = default)
     {
         var update = Builders<Reel>.Update.PullFilter(r => r.ReelElements, e => e.Id == elementId);
         var result = await _reelsMongoCollection.UpdateOneAsync(
@@ -117,8 +128,9 @@ public class ReelRepository : IReelRepository
 
         return result.ModifiedCount > 0;
     }
-    
-    public async Task<ReelElement?> InsertReelElementAsync(Guid reelId, Guid insertAfterElementId, ReelElement reelElement, CancellationToken cancellationToken = default)
+
+    public async Task<ReelElement?> InsertReelElementAsync(Guid reelId, Guid insertAfterElementId,
+        ReelElement reelElement, CancellationToken cancellationToken = default)
     {
         var filter = Builders<Reel>.Filter.And(
             Builders<Reel>.Filter.Eq(r => r.Id, reelId),
@@ -136,13 +148,15 @@ public class ReelRepository : IReelRepository
         return result?.ReelElements.FirstOrDefault(e => e.Id == reelElement.Id);
     }
 
-    public async Task<ReelElement?> PrependReelElementAsync(Guid reelId, ReelElement reelElement, CancellationToken cancellationToken = default)
+    public async Task<ReelElement?> PrependReelElementAsync(Guid reelId, ReelElement reelElement,
+        CancellationToken cancellationToken = default)
     {
         var update = Builders<Reel>.Update.PushEach(r => r.ReelElements, [reelElement], position: 0);
-        var result = await _reelsMongoCollection.FindOneAndUpdateAsync(r => r.Id == reelId, update, new FindOneAndUpdateOptions<Reel>
-        {
-            ReturnDocument = ReturnDocument.After
-        }, cancellationToken: cancellationToken);
+        var result = await _reelsMongoCollection.FindOneAndUpdateAsync(r => r.Id == reelId, update,
+            new FindOneAndUpdateOptions<Reel>
+            {
+                ReturnDocument = ReturnDocument.After
+            }, cancellationToken: cancellationToken);
         return result?.ReelElements.FirstOrDefault(e => e.Id == reelElement.Id);
     }
 }

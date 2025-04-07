@@ -21,7 +21,7 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
         var workspacesGroup = builder.MapGroup("/users/me/workspaces").RequireAuthorization();
 
         workspacesGroup.MapGet("/", GetByOwnerAsync);
-        workspacesGroup.MapGet("/{id:guid}", GetWorkspace);
+        workspacesGroup.MapGet("/{id:guid}", GetWorkspace).WithName(nameof(GetWorkspace));
         workspacesGroup.MapPost("/", AddWorkspace);
         workspacesGroup.MapPut("/{id:guid}", UpdateWorkspace);
         workspacesGroup.MapDelete("/{id:guid}", RemoveWorkspace);
@@ -57,7 +57,7 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
                 });
     }
     
-    private static async Task<Results<BadRequest<string>, NotFound<string>, Created>> AddWorkspace(
+    private static async Task<Results<BadRequest<string>, NotFound<string>, CreatedAtRoute<WorkspaceResponse>>> AddWorkspace(
         [FromServices] IWorkspaceService workspaceService,
         [FromBody] AddWorkspaceRequest request,
         ClaimsPrincipal user
@@ -65,12 +65,10 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
     {
         var workspace = request.ToWorkspace(user.GetUserId());
         
-        workspace.OwnerId = user.GetUserId();
-        
         var workspaceResult = await workspaceService.CreateAsync(workspace);
 
-        return workspaceResult.Match<Results<BadRequest<string>, NotFound<string>, Created>>(
-            workspaceId => TypedResults.Created(workspaceId.ToString()),
+        return workspaceResult.Match<Results<BadRequest<string>, NotFound<string>, CreatedAtRoute<WorkspaceResponse>>>(
+            workspaceId => TypedResults.CreatedAtRoute(workspace.ToResponse(), nameof(GetWorkspace), new { id = workspaceId }),
             exception => exception switch
             {
                 WorkspaceNameRequiredException => TypedResults.BadRequest(WorkspaceNameRequired),

@@ -51,8 +51,12 @@ public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactor
     public override async Task RemoveAsync(Guid id)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
-        
-        context.Workspaces.Remove(new Workspace { Id = id });
+        var workspace = context.Workspaces.FirstOrDefault(x => x.Id == id);
+        if (workspace is null)
+        {
+            return;
+        }
+        context.Remove(workspace);
         
         await context.SaveChangesAsync();
     }

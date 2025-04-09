@@ -15,11 +15,21 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository): Workspa
         return new Result<IEnumerable<Workspace>>(workspaces);
     }
 
-    public override async Task<Result<Workspace>> GetAsync(Guid id)
+    public override async Task<Result<Workspace>> GetAsync(Guid id, Guid userId)
     {
         var workspace = await workspaceRepository.GetAsync(id);
         
-        return workspace ?? new Result<Workspace>(new WorkspaceNotFoundException());
+        if (workspace == null)
+        {
+            return new Result<Workspace>(new WorkspaceNotFoundException());
+        }
+
+        if (workspace.OwnerId != userId)
+        {
+            return new Result<Workspace>(new PermissionDeniedException());
+        }
+        
+        return workspace;
     }
 
     public override async Task<Result<Guid>> CreateAsync(Workspace workspace)
@@ -65,7 +75,7 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository): Workspa
         return Unit.Default;
     }
     
-    public override async Task<Result<Unit>> RemoveAsync(Guid userId, Guid workspaceId)
+    public override async Task<Result<Unit>> RemoveAsync(Guid workspaceId, Guid userId)
     {
         var workspace = await workspaceRepository.GetAsync(workspaceId);
         

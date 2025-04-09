@@ -1,5 +1,6 @@
 ﻿using Doner.Features.ReelsFeature.Elements;
 using Doner.Features.ReelsFeature.Repository;
+using Doner.Features.WorkspaceFeature.Exceptions;
 using Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 using FluentValidation;
 using LanguageExt;
@@ -90,19 +91,20 @@ public class ReelService : IReelService
     public async Task<IEnumerable<Reel>> GetByWorkspaceAsync(Guid workspaceId, Guid userId,
         CancellationToken cancellationToken = default)
     {
-        var workspaceResult = await _workspaceService.GetAsync(workspaceId);
+        var workspaceResult = await _workspaceService.GetAsync(workspaceId, userId);
 
        _ = workspaceResult.Match(
            // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
-           w =>
-            {
-                if (w.OwnerId != userId)
-                {
-                    throw new UnauthorizedAccessException();
-                }
-                return Unit.Default;
-            },
-            e => throw e
+           _ => Unit.Default,
+           e =>
+           {
+               if (e is PermissionDeniedException)
+               {
+                   throw new UnauthorizedAccessException();
+               }
+
+               throw e;
+           }
         );
 
 

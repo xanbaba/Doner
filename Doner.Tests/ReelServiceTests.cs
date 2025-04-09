@@ -3,6 +3,7 @@ using Doner.Features.ReelsFeature.Elements;
 using Doner.Features.ReelsFeature.Repository;
 using Doner.Features.ReelsFeature.Services;
 using Doner.Features.WorkspaceFeature.Entities;
+using Doner.Features.WorkspaceFeature.Exceptions;
 using Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 using FluentAssertions;
 using FluentValidation;
@@ -27,12 +28,13 @@ public class ReelServiceTests
             v => v.RuleFor(r => r.Name).NotEmpty(),
             v => v.RuleFor(r => r.WorkspaceId).NotEmpty()
         };
-        
+
         IValidator<ReelElement> reelElementValidator = new InlineValidator<ReelElement>
         {
             v => v.RuleFor(r => r.Id).NotEmpty()
         };
-        _reelService = new ReelService(_reelRepositoryMock.Object, reelValidator, reelElementValidator, _workspaceServiceMock.Object);
+        _reelService = new ReelService(_reelRepositoryMock.Object, reelValidator, reelElementValidator,
+            _workspaceServiceMock.Object);
     }
 
     [Fact]
@@ -123,7 +125,7 @@ public class ReelServiceTests
         var workspaceId = Guid.NewGuid();
         var userId = Guid.NewGuid();
         var reels = new List<Reel> { CreateTestReel(workspaceId: workspaceId, ownerId: userId) };
-        _workspaceServiceMock.Setup(w => w.GetAsync(workspaceId))
+        _workspaceServiceMock.Setup(w => w.GetAsync(workspaceId, userId))
             .ReturnsAsync(new Result<Workspace>(new Workspace { OwnerId = userId }));
         _reelRepositoryMock.Setup(r => r.GetByWorkspaceAsync(workspaceId, It.IsAny<CancellationToken>()))
             .ReturnsAsync(reels);
@@ -134,12 +136,25 @@ public class ReelServiceTests
     }
 
     [Fact]
+    public async Task GetByWorkspaceAsync_ShouldThrowWorkspaceNotFoundException_WhenWorkspaceDoesNotExist()
+    {
+        var workspaceId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
+        _workspaceServiceMock.Setup(w => w.GetAsync(workspaceId, userId))
+            .ReturnsAsync(new Result<Workspace>(new WorkspaceNotFoundException()));
+
+        Func<Task> act = async () => await _reelService.GetByWorkspaceAsync(workspaceId, userId);
+
+        await act.Should().ThrowAsync<WorkspaceNotFoundException>();
+    }
+
+    [Fact]
     public async Task GetByWorkspaceAsync_ShouldThrowUnauthorizedAccessException_WhenUserIsNotWorkspaceOwner()
     {
         var workspaceId = Guid.NewGuid();
         var userId = Guid.NewGuid();
-        _workspaceServiceMock.Setup(w => w.GetAsync(workspaceId))
-            .ReturnsAsync(new Result<Workspace>(new Workspace { OwnerId = Guid.NewGuid() }));
+        _workspaceServiceMock.Setup(w => w.GetAsync(workspaceId, userId))
+            .ReturnsAsync(new Result<Workspace>(new PermissionDeniedException()));
 
         Func<Task> act = async () => await _reelService.GetByWorkspaceAsync(workspaceId, userId);
 

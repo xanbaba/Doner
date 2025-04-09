@@ -42,10 +42,11 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
 
     private static async Task<Results<NotFound<string>, Ok<WorkspaceResponse>>> GetWorkspace(
         [FromServices] IWorkspaceService workspaceService,
-        [FromRoute] Guid id
+        [FromRoute] Guid id,
+        [FromServices] ClaimsPrincipal user
         )
     {
-        var workspaceResult = await workspaceService.GetAsync(id);
+        var workspaceResult = await workspaceService.GetAsync(id, user.GetUserId());
         
         return workspaceResult
             .Match<Results<NotFound<string>, Ok<WorkspaceResponse>>>(
@@ -105,7 +106,7 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
         ClaimsPrincipal user
     )
     {
-        var workspaceResult = await workspaceService.RemoveAsync(user.GetUserId(), id);
+        var workspaceResult = await workspaceService.RemoveAsync(id, user.GetUserId());
         
         return workspaceResult.Match<Results<NotFound<string>, NoContent, BadRequest<string>>>(
             _ => TypedResults.NoContent(),

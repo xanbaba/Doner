@@ -8,12 +8,12 @@ public interface IWorkspaceService
 {
     Task<Result<IEnumerable<Workspace>>> GetByOwnerAsync(Guid ownerId);
     
-    Task<Result<Workspace>> GetAsync(Guid id);
+    Task<Result<Workspace>> GetAsync(Guid id, Guid userId);
 
     Task<Result<Guid>> CreateAsync(Workspace workspace);
     
     Task<Result<Unit>> UpdateAsync(Workspace workspace);
     
-    Task<Result<Unit>> RemoveAsync(Guid userId, Guid workspaceId);
-    Task<Result<Unit>> RemoveAsync(Guid userId, Workspace workspace);
+    Task<Result<Unit>> RemoveAsync(Guid workspaceId, Guid userId);
+    Task<Result<Unit>> RemoveAsync(Workspace workspace, Guid userId);
 }

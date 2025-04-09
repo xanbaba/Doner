@@ -2,6 +2,7 @@
 using Contracts.V1.Requests;
 using Contracts.V1.Responses;
 using Doner.Features.ReelsFeature.Services;
+using Doner.Features.WorkspaceFeature.Exceptions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -105,7 +106,7 @@ public class ReelEndpointMapper : IEndpointMapper
         }
     }
 
-    private static async Task<Results<Ok<ReelsResponse>, ForbidHttpResult>> GetReels
+    private static async Task<Results<Ok<ReelsResponse>, ForbidHttpResult, NotFound>> GetReels
     (
         [AsParameters] GetReelsRequest request,
         [FromServices] IReelService reelService,
@@ -122,6 +123,10 @@ public class ReelEndpointMapper : IEndpointMapper
         catch (UnauthorizedAccessException)
         {
             return TypedResults.Forbid();
+        }
+        catch (WorkspaceNotFoundException)
+        {
+            return TypedResults.NotFound();
         }
     }
 }

@@ -30,4 +30,14 @@ public class AppDbContext : DbContext
             );
         return base.SaveChanges();
     }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        ChangeTracker.Entries<User>()
+            .Where(e => e.State == EntityState.Deleted)
+            .Select(e => e.Entity).Iter(user =>
+                WorkspaceInvites.RemoveRange(WorkspaceInvites.Where(uw => uw.UserId == user.Id))
+            );
+        return base.SaveChangesAsync(cancellationToken);
+    }
 }

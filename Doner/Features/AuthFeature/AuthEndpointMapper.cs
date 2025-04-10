@@ -65,9 +65,12 @@ public abstract class AuthEndpointMapper : IEndpointMapper
         [FromServices] IConfiguration configuration,
         [FromServices] JwtTokenGenerator accessTokenGenerator,
         [FromServices] IRefreshTokensManager refreshTokensManager,
-        [FromServices] AppDbContext dbContext
+        [FromServices] AppDbContext dbContext,
+        [FromServices] IValidator<SignInRequest> signInRequestValidator
     )
     {
+        await signInRequestValidator.ValidateAndThrowAsync(request);
+        
         var user = dbContext.Users.FirstOrDefault(x => x.Login == request.Login);
         if (user is null)
         {

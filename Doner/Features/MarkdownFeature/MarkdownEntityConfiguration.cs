@@ -11,5 +11,6 @@ public class MarkdownEntityConfiguration : IEntityTypeConfiguration<Markdown>
         builder.Property(x => x.Name).IsRequired().HasMaxLength(100);
         builder.Property(x => x.Uri).IsRequired().HasMaxLength(200);
         builder.Property(x => x.WorkspaceId).IsRequired();
+        builder.HasOne(x => x.Workspace).WithMany().OnDelete(DeleteBehavior.Cascade);
     }
 }

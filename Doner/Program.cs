@@ -1,5 +1,6 @@
 using Doner.DataBase;
 using Doner.Features.AuthFeature;
+using Doner.Features.MarkdownFeature;
 using Doner.Features.ReelsFeature;
 using Doner.Features.WorkspaceFeature;
 using FluentValidation;
@@ -22,6 +23,7 @@ public class Program
         builder.AddFeature<AuthFeature>();
         builder.AddFeature<ReelsFeature>();
         builder.AddFeature<WorkspaceFeature>();
+        builder.AddFeature<MarkdownFeature>();
         builder.Services.AddDbContextFactory<AppDbContext>(optionsBuilder =>
         {
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -48,6 +50,7 @@ public class Program
         app.UseFeature<AuthFeature>();
         app.UseFeature<ReelsFeature>();
         app.UseFeature<WorkspaceFeature>();
+        app.UseFeature<MarkdownFeature>();
 
         app.Run();
     }

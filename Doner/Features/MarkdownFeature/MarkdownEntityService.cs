@@ -63,7 +63,6 @@ public class MarkdownEntityService : IMarkdownEntityService
         await _markdownValidator.ValidateAndThrowAsync(markdown);
 
         existingMarkdown.Name = markdown.Name;
-        existingMarkdown.Uri = markdown.Uri;
 
         _dbContext.Markdowns.Update(existingMarkdown);
         await _dbContext.SaveChangesAsync();

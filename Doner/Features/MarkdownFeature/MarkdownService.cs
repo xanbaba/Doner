@@ -17,7 +17,7 @@ public class MarkdownService : IMarkdownService
         _markdownValidator = markdownValidator;
     }
 
-    public async Task<Markdown> CreateMarkdownAsync(Markdown markdown, Guid userId)
+    public async Task<Markdown> AddMarkdownAsync(Markdown markdown, Guid userId)
     {
         await ValidateUserAccessAsync(markdown.WorkspaceId, userId);
         await _markdownValidator.ValidateAndThrowAsync(markdown);

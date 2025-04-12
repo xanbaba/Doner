@@ -2,7 +2,7 @@ namespace Doner.Features.MarkdownFeature;
 
 public interface IMarkdownService
 {
-    Task<Markdown> CreateMarkdownAsync(Markdown markdown, Guid userId);
+    Task<Markdown> AddMarkdownAsync(Markdown markdown, Guid userId);
     Task<Markdown> GetMarkdownAsync(Guid id, Guid userId);
     Task<Markdown> DeleteMarkdownAsync(Guid id, Guid userId);
     Task<Markdown> UpdateMarkdownAsync(Markdown markdown, Guid userId);

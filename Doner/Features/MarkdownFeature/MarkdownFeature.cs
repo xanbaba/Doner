@@ -9,6 +9,6 @@ public abstract class MarkdownFeature : IFeature
 
     public static void Configure(WebApplication app)
     {
-        
+        app.MapGroup("/api/v1").MapEndpoints<MarkdownEndpointMapper>();
     }
 }

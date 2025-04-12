@@ -23,13 +23,13 @@ public class MarkdownEndpointMapper : IEndpointMapper
     private static async Task<Results<Ok<MarkdownsResponse>, ForbidHttpResult, NotFound>> GetMarkdowns
     (
         [FromRoute] Guid workspaceId,
-        [FromServices] IMarkdownService markdownService,
+        [FromServices] IMarkdownEntityService markdownEntityService,
         ClaimsPrincipal user
     )
     {
         try
         {
-            var markdowns = await markdownService.GetMarkdownsAsync(workspaceId, user.GetUserId());
+            var markdowns = await markdownEntityService.GetMarkdownsAsync(workspaceId, user.GetUserId());
             return TypedResults.Ok(markdowns.ToResponse());
         }
         catch (UnauthorizedAccessException)
@@ -45,13 +45,13 @@ public class MarkdownEndpointMapper : IEndpointMapper
     private static async Task<Results<Ok<MarkdownResponse>, ForbidHttpResult, NotFound>> GetMarkdownById
     (
         [FromRoute] Guid markdownId,
-        [FromServices] IMarkdownService markdownService,
+        [FromServices] IMarkdownEntityService markdownEntityService,
         ClaimsPrincipal user
     )
     {
         try
         {
-            var markdown = await markdownService.GetMarkdownAsync(markdownId, user.GetUserId());
+            var markdown = await markdownEntityService.GetMarkdownAsync(markdownId, user.GetUserId());
             return TypedResults.Ok(markdown.ToResponse());
         }
         catch (UnauthorizedAccessException)
@@ -68,14 +68,14 @@ public class MarkdownEndpointMapper : IEndpointMapper
     (
         [FromRoute] Guid workspaceId,
         [FromBody] AddMarkdownRequest request,
-        [FromServices] IMarkdownService markdownService,
+        [FromServices] IMarkdownEntityService markdownEntityService,
         ClaimsPrincipal user
     )
     {
         try
         {
             var markdown = request.ToMarkdown(workspaceId);
-            var createdMarkdown = await markdownService.AddMarkdownAsync(markdown, user.GetUserId());
+            var createdMarkdown = await markdownEntityService.AddMarkdownAsync(markdown, user.GetUserId());
             return TypedResults.CreatedAtRoute(createdMarkdown.ToResponse(), nameof(GetMarkdownById), new { markdownId = createdMarkdown.Id });
         }
         catch (UnauthorizedAccessException)
@@ -92,14 +92,14 @@ public class MarkdownEndpointMapper : IEndpointMapper
     (
         [FromRoute] Guid markdownId,
         [FromBody] UpdateMarkdownRequest request,
-        [FromServices] IMarkdownService markdownService,
+        [FromServices] IMarkdownEntityService markdownEntityService,
         ClaimsPrincipal user
     )
     {
         try
         {
             var markdown = request.ToMarkdown(markdownId);
-            await markdownService.UpdateMarkdownAsync(markdown, user.GetUserId());
+            await markdownEntityService.UpdateMarkdownAsync(markdown, user.GetUserId());
             return TypedResults.NoContent();
         }
         catch (UnauthorizedAccessException)
@@ -115,13 +115,13 @@ public class MarkdownEndpointMapper : IEndpointMapper
     private static async Task<Results<NoContent, ForbidHttpResult, NotFound>> DeleteMarkdown
     (
         [FromRoute] Guid markdownId,
-        [FromServices] IMarkdownService markdownService,
+        [FromServices] IMarkdownEntityService markdownEntityService,
         ClaimsPrincipal user
     )
     {
         try
         {
-            await markdownService.DeleteMarkdownAsync(markdownId, user.GetUserId());
+            await markdownEntityService.DeleteMarkdownAsync(markdownId, user.GetUserId());
             return TypedResults.NoContent();
         }
         catch (UnauthorizedAccessException)

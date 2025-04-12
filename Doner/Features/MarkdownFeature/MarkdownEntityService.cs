@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Doner.Features.MarkdownFeature;
 
-public class MarkdownService : IMarkdownService
+public class MarkdownEntityService : IMarkdownEntityService
 {
     private readonly AppDbContext _dbContext;
     private readonly IValidator<Markdown> _markdownValidator;
 
-    public MarkdownService(AppDbContext dbContext, IValidator<Markdown> markdownValidator)
+    public MarkdownEntityService(AppDbContext dbContext, IValidator<Markdown> markdownValidator)
     {
         _dbContext = dbContext;
         _markdownValidator = markdownValidator;

@@ -1,6 +1,6 @@
 namespace Doner.Features.MarkdownFeature;
 
-public interface IMarkdownService
+public interface IMarkdownEntityService
 {
     Task<Markdown> AddMarkdownAsync(Markdown markdown, Guid userId);
     Task<Markdown> GetMarkdownAsync(Guid id, Guid userId);

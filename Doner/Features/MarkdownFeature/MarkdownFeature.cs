@@ -4,7 +4,7 @@ public abstract class MarkdownFeature : IFeature
 {
     public static void Build(WebApplicationBuilder builder)
     {
-        builder.Services.AddScoped<IMarkdownService, MarkdownService>();
+        builder.Services.AddScoped<IMarkdownEntityService, MarkdownEntityService>();
     }
 
     public static void Configure(WebApplication app)

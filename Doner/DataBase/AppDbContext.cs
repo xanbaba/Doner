@@ -1,5 +1,4 @@
 using Doner.Features.AuthFeature.Entities;
-using Doner.Features.MarkdownFeature;
 using Doner.Features.WorkspaceFeature.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +10,6 @@ public class AppDbContext : DbContext
     public DbSet<Workspace> Workspaces { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<WorkspaceInvite> WorkspaceInvites { get; set; }
-    public DbSet<Markdown> Markdowns { get; set; }
     
     public AppDbContext(DbContextOptions<AppDbContext> options)
         : base(options)

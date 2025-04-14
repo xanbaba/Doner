@@ -9,9 +9,8 @@ public class SignUpRequestValidator : AbstractValidator<SignUpRequest>
     {
         RuleFor(u => u.Email).EmailAddress().NotEmpty().MaximumLength(255)
             .When(u => u.Email is not null);
-        RuleFor(u => u.FirstName).NotEmpty().MaximumLength(50);
-        RuleFor(u => u.LastName).NotEmpty().MaximumLength(100)
-            .When(u => u.LastName is not null);
+        RuleFor(u => u.Username).NotEmpty().Matches("^[a-zA-Z0-9_]+$")
+            .WithMessage("Username must contain only letters, numbers, and underscores.");
         RuleFor(u => u.Login).NotEmpty().Length(8, 100)
             .Matches("^[a-zA-Z0-9_]+$")
             .WithMessage("Login must contain only letters, numbers, and underscores.");

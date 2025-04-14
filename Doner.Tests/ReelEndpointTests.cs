@@ -61,8 +61,7 @@ public class ReelEndpointTests : IClassFixture<WebApplicationFactory<Program>>, 
     {
         var signUpRequest = new SignUpRequest
         {
-            FirstName = "Test",
-            LastName = "User",
+            Username = "testuser",
             Login = "testuser",
             Password = "Password123!"
         };

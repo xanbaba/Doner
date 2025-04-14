@@ -11,14 +11,8 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.HasKey(x => x.Id);
         
         // FirstName
-        builder.Property(x => x.FirstName).IsRequired().HasMaxLength(50).IsUnicode();
-        builder.HasIndex(x => x.FirstName).IsUnique(false);
-        
-        // LastName
-        builder.Property(x => x.LastName).HasMaxLength(100).IsUnicode();
-        
-        // MiddleName
-        builder.Property(x => x.MiddleName).HasMaxLength(50).IsUnicode();
+        builder.Property(x => x.Username).IsRequired().HasMaxLength(50).IsUnicode();
+        builder.HasIndex(x => x.Username).IsUnique(false);
         
         // Login
         builder.Property(x => x.Login).IsRequired().HasMaxLength(100).IsUnicode(false);

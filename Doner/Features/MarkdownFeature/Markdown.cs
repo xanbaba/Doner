@@ -1,12 +1,25 @@
-using Doner.Features.WorkspaceFeature.Entities;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Doner.Features.MarkdownFeature;
 
 public class Markdown
 {
+    [BsonId]
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid Id { get; set; }
-    public string Name { get; set; } = null!;
-    public Guid WorkspaceId { get; set; }
-    public Workspace Workspace { get; set; } = null!;
-    public string Uri { get; set; } = null!;
+
+    public string Title { get; set; } = null!;
+
+    public DateTime CreatedAt { get; set; }
+
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
+    public Guid CreatedById { get; set; }
+
+    public List<MarkdownChunk> Chunks { get; set; } = [];
+
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
+    public List<Guid> CollaboratorIds { get; set; } = [];
+
+    public int Version { get; set; }
 }

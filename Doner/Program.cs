@@ -5,6 +5,7 @@ using Doner.Features.ReelsFeature;
 using Doner.Features.WorkspaceFeature;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 
 namespace Doner;
 
@@ -29,6 +30,7 @@ public class Program
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             optionsBuilder.UseSqlServer(connectionString);
         });
+        builder.Services.AddSingleton(_ => new MongoClient(builder.Configuration.GetConnectionString("MongoDb")).GetDatabase("Doner"));
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
         var app = builder.Build();

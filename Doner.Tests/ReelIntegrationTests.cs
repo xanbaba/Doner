@@ -8,6 +8,7 @@ using Doner.Features.WorkspaceFeature.Repository;
 using Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 using FluentAssertions;
 using FluentValidation;
+using Microsoft.Extensions.Configuration;
 using Mongo2Go;
 using MongoDB.Driver;
 using SearchOption = Contracts.V1.SearchOption;
@@ -39,7 +40,7 @@ public class ReelIntegrationTests : IDisposable
         );
         var appDbContextFactory = new AppDbContextFactory();
         var workspaceRepository = new WorkspaceRepository(appDbContextFactory);
-        _workspaceService = new WorkspaceService(workspaceRepository);
+        _workspaceService = new WorkspaceService(workspaceRepository, null!, null!, null!);
         _reelService = new ReelService(reelRepository, reelValidator, reelElementValidator, _workspaceService);
     }
 

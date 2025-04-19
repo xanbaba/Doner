@@ -1,21 +1,28 @@
 using System.Security.Claims;
 using Contracts.V1.Requests;
 using Contracts.V1.Responses;
+using Doner.DataBase;
 using Doner.Features.WorkspaceFeature.Exceptions;
+using Doner.Features.WorkspaceFeature.Repository;
 using Doner.Features.WorkspaceFeature.Services;
+using Doner.Features.WorkspaceFeature.Services.EmailService;
+using Doner.Features.WorkspaceFeature.Services.InviteLinkService;
 using Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 using Doner.Resources;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Internal;
 
 namespace Doner.Features.WorkspaceFeature;
 
-public abstract class WorkspaceEndpointMapper: IEndpointMapper
+public abstract class WorkspaceEndpointMapper : IEndpointMapper
 {
     private const string WorkspaceNotFound = "A workspace with this name already exists.";
     private const string WorkspaceNameRequired = "Workspace name is required.";
     private const string WorkspaceAlreadyExists = "A workspace with this name already exists.";
-    
+    private const string WorkspaceInviteAlreadyExists = "Invite to this user already exists.";
+    private const string InviteIsNotValid = "Invite is invalid.";
+
     public static void Map(IEndpointRouteBuilder builder)
     {
         var workspacesGroup = builder.MapGroup("/users/me/workspaces").RequireAuthorization();
@@ -34,7 +41,7 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
     )
     {
         var workspacesResult = await workspaceService.GetByOwnerAsync(user.GetUserId());
-        
+
         return workspacesResult.Match(
             items => TypedResults.Ok(items.ToResponse()),
             exception => throw exception);
@@ -44,32 +51,34 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
         [FromServices] IWorkspaceService workspaceService,
         [FromRoute] Guid id,
         [FromServices] ClaimsPrincipal user
-        )
+    )
     {
         var workspaceResult = await workspaceService.GetAsync(id, user.GetUserId());
-        
+
         return workspaceResult
             .Match<Results<NotFound<string>, Ok<WorkspaceResponse>>>(
-                workspace => TypedResults.Ok(workspace.ToResponse()), 
+                workspace => TypedResults.Ok(workspace.ToResponse()),
                 exception => exception switch
                 {
                     WorkspaceNotFoundException => TypedResults.NotFound(WorkspaceNotFound),
                     _ => throw exception
                 });
     }
-    
-    private static async Task<Results<BadRequest<string>, NotFound<string>, CreatedAtRoute<WorkspaceResponse>>> AddWorkspace(
-        [FromServices] IWorkspaceService workspaceService,
-        [FromBody] AddWorkspaceRequest request,
-        ClaimsPrincipal user
+
+    private static async Task<Results<BadRequest<string>, NotFound<string>, CreatedAtRoute<WorkspaceResponse>>>
+        AddWorkspace(
+            [FromServices] IWorkspaceService workspaceService,
+            [FromBody] AddWorkspaceRequest request,
+            ClaimsPrincipal user
         )
     {
         var workspace = request.ToWorkspace(user.GetUserId());
-        
+
         var workspaceResult = await workspaceService.CreateAsync(workspace);
 
         return workspaceResult.Match<Results<BadRequest<string>, NotFound<string>, CreatedAtRoute<WorkspaceResponse>>>(
-            workspaceId => TypedResults.CreatedAtRoute(workspace.ToResponse(), nameof(GetWorkspace), new { id = workspaceId }),
+            workspaceId =>
+                TypedResults.CreatedAtRoute(workspace.ToResponse(), nameof(GetWorkspace), new { id = workspaceId }),
             exception => exception switch
             {
                 WorkspaceNameRequiredException => TypedResults.BadRequest(WorkspaceNameRequired),
@@ -84,7 +93,7 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
         [FromBody] UpdateWorkspaceRequest request,
         ClaimsPrincipal user,
         Guid id
-        )
+    )
     {
         var workspace = request.ToWorkspace(id, user.GetUserId());
         var workspaceResult = await workspaceService.UpdateAsync(workspace);
@@ -99,7 +108,7 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
                 _ => throw exception
             });
     }
-    
+
     private static async Task<Results<NotFound<string>, NoContent, BadRequest<string>>> RemoveWorkspace(
         [FromServices] IWorkspaceService workspaceService,
         [FromRoute] Guid id,
@@ -107,7 +116,7 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
     )
     {
         var workspaceResult = await workspaceService.RemoveAsync(id, user.GetUserId());
-        
+
         return workspaceResult.Match<Results<NotFound<string>, NoContent, BadRequest<string>>>(
             _ => TypedResults.NoContent(),
             exception =>
@@ -121,4 +130,37 @@ public abstract class WorkspaceEndpointMapper: IEndpointMapper
             }
         );
     }
+
+    private static async Task<Results<NotFound<string>, NoContent, BadRequest<string>>> InviteUserAsync(
+        [FromServices] IWorkspaceService workspaceService,
+        [FromBody] InviteRequest request,
+        [FromRoute] Guid id,
+        ClaimsPrincipal user
+    )
+    {
+        var workspaceResult = await workspaceService.InviteUserAsync(id, user.GetUserId(), request.Email);
+
+        return workspaceResult.Match<Results<NotFound<string>, NoContent, BadRequest<string>>>(
+            _ => TypedResults.NoContent(),
+            exception =>
+            {
+                return exception switch
+                {
+                    WorkspaceNotFoundException => TypedResults.NotFound(WorkspaceNotFound),
+                    PermissionDeniedException => TypedResults.BadRequest(SharedResources.PermissionDenied),
+                    WorkspaceInviteAlreadyExistsException => TypedResults.BadRequest(WorkspaceInviteAlreadyExists),
+                    _ => throw exception
+                };
+            }
+        );
+    }
+
+    // private static async Task<Results<NotFound<string>, NoContent, BadRequest<string>>> AcceptInviteAsync(
+    //     [FromServices] IInviteLinkService inviteLinkService,
+    //     [FromRoute] string encrypted,
+    //     ClaimsPrincipal user
+    // )
+    // {
+    //     
+    // }
 }

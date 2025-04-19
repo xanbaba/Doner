@@ -15,7 +15,7 @@ public class WorkspaceServiceTests
     public WorkspaceServiceTests()
     {
         _workspaceRepositoryMock = new Mock<IWorkspaceRepository>();
-        _workspaceService = new WorkspaceService(_workspaceRepositoryMock.Object);
+        _workspaceService = new WorkspaceService(_workspaceRepositoryMock.Object, null!, null!, null!);
     }
 
     [Fact]

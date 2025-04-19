@@ -1,6 +1,7 @@
 using Doner.Features.WorkspaceFeature.Entities;
 using LanguageExt;
 using LanguageExt.Common;
+using Sprache;
 
 namespace Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 
@@ -16,4 +17,6 @@ public interface IWorkspaceService
     
     Task<Result<Unit>> RemoveAsync(Guid workspaceId, Guid userId);
     Task<Result<Unit>> RemoveAsync(Workspace workspace, Guid userId);
+    Task<Result<Unit>> InviteUserAsync(Guid workspaceId, Guid userId, string email);
+    Task<Result<Unit>> InviteUserAsync(Workspace workspace, Guid userId, string email);
 }

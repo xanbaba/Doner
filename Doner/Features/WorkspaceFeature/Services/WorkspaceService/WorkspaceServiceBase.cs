@@ -20,4 +20,11 @@ public abstract class WorkspaceServiceBase: IWorkspaceService
     {
         return await RemoveAsync(userId, workspace.Id);
     }
+
+    public abstract Task<Result<Unit>> InviteUserAsync(Guid workspaceId, Guid userId, string email);
+
+    public async Task<Result<Unit>> InviteUserAsync(Workspace workspace, Guid userId, string email)
+    {
+        return await InviteUserAsync(workspace.Id, userId, email);
+    }
 }

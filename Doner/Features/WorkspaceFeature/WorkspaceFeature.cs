@@ -1,4 +1,5 @@
 using Doner.Features.WorkspaceFeature.Repository;
+using Doner.Features.WorkspaceFeature.Services.EmailService;
 using Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 
 namespace Doner.Features.WorkspaceFeature;
@@ -9,6 +10,7 @@ public class WorkspaceFeature: IFeature
     {
         builder.Services.AddScoped<IWorkspaceRepository, WorkspaceRepository>();
         builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
+        builder.Services.AddScoped<IEmailService, EmailService>();
     }
 
     public static void Configure(WebApplication app)

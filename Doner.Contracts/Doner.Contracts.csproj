@@ -7,4 +7,9 @@
         <RootNamespace>Contracts</RootNamespace>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="MailKit" Version="4.11.0" />
+      <PackageReference Include="SendGrid" Version="9.29.3" />
+    </ItemGroup>
+
 </Project>

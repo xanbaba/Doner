@@ -1,3 +1,4 @@
+using Doner.Features.AuthFeature.Entities;
 using Doner.Features.WorkspaceFeature.Entities;
 
 namespace Doner.Features.WorkspaceFeature.Repository;

@@ -1,12 +1,16 @@
+using System.Text;
+using Doner.DataBase;
 using Doner.Features.WorkspaceFeature.Entities;
 using Doner.Features.WorkspaceFeature.Exceptions;
 using Doner.Features.WorkspaceFeature.Repository;
+using Doner.Features.WorkspaceFeature.Services.EmailService;
+using Doner.Features.WorkspaceFeature.Services.InviteLinkService;
 using LanguageExt;
 using LanguageExt.Common;
 
 namespace Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 
-public class WorkspaceService(IWorkspaceRepository workspaceRepository): WorkspaceServiceBase
+public class WorkspaceService(IWorkspaceRepository workspaceRepository, IInviteLinkService inviteLinkService, IEmailService emailService, AppDbContext dbContext): WorkspaceServiceBase
 {
     public override async Task<Result<IEnumerable<Workspace>>> GetByOwnerAsync(Guid ownerId)
     {
@@ -91,6 +95,46 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository): Workspa
         
         await workspaceRepository.RemoveAsync(workspaceId);
 
+        return Unit.Default;
+    }
+
+    public override async Task<Result<Unit>> InviteUserAsync(Guid workspaceId, Guid userId, string email)
+    {
+        var workspace = await workspaceRepository.GetAsync(workspaceId);
+
+        if (workspace == null)
+        {
+            return new Result<Unit>(new WorkspaceNotFoundException());
+        }
+
+        if (string.IsNullOrEmpty(email))
+        {
+            return new Result<Unit>(new ArgumentNullException());
+        }
+        
+        if (workspace.OwnerId != userId)
+        {
+            return new Result<Unit>(new PermissionDeniedException());
+        }
+        
+        var inviteAlreadyExists = workspace.Invitees.Any(wi => wi.User.Email == email && wi.WorkspaceId == workspaceId);
+
+        if (inviteAlreadyExists)
+        {
+            return new Result<Unit>(new WorkspaceInviteAlreadyExistsException());
+        }
+        
+        var userToInvite = dbContext.Users.SingleOrDefault(u => u.Id == userId);
+
+        if (userToInvite == null)
+        {
+            return new Result<Unit>(new ArgumentNullException());
+        }
+        
+        var link = inviteLinkService.GenerateLink(workspace.Id, userToInvite.Id);
+        
+        await emailService.SendEmailInviteAsync(email, userToInvite.FirstName, link);
+        
         return Unit.Default;
     }
 }

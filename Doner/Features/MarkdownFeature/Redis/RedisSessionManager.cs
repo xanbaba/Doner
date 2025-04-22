@@ -12,7 +12,6 @@ public class RedisSessionManager : ISessionManager
     // Keys and prefixes for Redis
     private const string SessionKeyPrefix = "markdown:session:";
     private const string SessionField = "active";
-    private static readonly TimeSpan DefaultSessionTimeout = TimeSpan.FromMinutes(30);
     
     public RedisSessionManager(
         IConnectionMultiplexer redis, 
@@ -33,7 +32,7 @@ public class RedisSessionManager : ISessionManager
         
         // Set session to active and set expiry
         await db.HashSetAsync(sessionKey, SessionField, "1");
-        await db.KeyExpireAsync(sessionKey, _options.SessionTimeout ?? DefaultSessionTimeout);
+        await db.KeyExpireAsync(sessionKey, _options.SessionTimeout);
         
         _logger.LogInformation("Opened session for markdown {MarkdownId}", markdownId);
     }
@@ -64,7 +63,7 @@ public class RedisSessionManager : ISessionManager
         string sessionKey = GetSessionKey(markdownId);
         
         // Extend the expiry time of the session
-        bool success = await db.KeyExpireAsync(sessionKey, _options.SessionTimeout ?? DefaultSessionTimeout);
+        bool success = await db.KeyExpireAsync(sessionKey, _options.SessionTimeout);
         
         if (success)
         {

@@ -1,6 +1,7 @@
 using Doner.Features.MarkdownFeature.Locking;
 using Doner.Features.MarkdownFeature.OT;
 using Doner.Features.MarkdownFeature.Repositories;
+using MongoDB.Driver;
 using StackExchange.Redis;
 
 namespace Doner.Features.MarkdownFeature;
@@ -35,6 +36,16 @@ public class MarkdownFeature : IFeature
         
         // Register OT service as scoped or transient based on your requirements
         builder.Services.AddScoped<IOTService, OTService>();
+
+        // Register Markdown repository
+        builder.Services.AddSingleton<IMarkdownRepository, MarkdownRepository>();
+        
+        // Register MongoDB Collection for Markdowns
+        builder.Services.AddSingleton<IMongoCollection<Markdown>>(sp =>
+        {
+            var db = sp.GetRequiredService<IMongoDatabase>();
+            return db.GetCollection<Markdown>("Markdowns");
+        });
     }
 
     public static void Configure(WebApplication app)

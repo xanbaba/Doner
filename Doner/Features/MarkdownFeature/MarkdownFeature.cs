@@ -1,5 +1,6 @@
 using Doner.Features.MarkdownFeature.Locking;
-using Doner.Features.MarkdownFeature.Redis;
+using Doner.Features.MarkdownFeature.OT;
+using Doner.Features.MarkdownFeature.Repositories;
 using StackExchange.Redis;
 
 namespace Doner.Features.MarkdownFeature;

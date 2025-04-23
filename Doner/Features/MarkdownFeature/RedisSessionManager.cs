@@ -1,7 +1,7 @@
-using StackExchange.Redis;
 using Microsoft.Extensions.Options;
+using StackExchange.Redis;
 
-namespace Doner.Features.MarkdownFeature.Redis;
+namespace Doner.Features.MarkdownFeature;
 
 public class RedisSessionManager : ISessionManager
 {

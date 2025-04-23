@@ -1,4 +1,4 @@
-namespace Doner.Features.MarkdownFeature;
+namespace Doner.Features.MarkdownFeature.OT;
 
 /// <summary>
 /// Interface for Operational Transformation processor that handles

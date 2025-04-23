@@ -1,4 +1,4 @@
-namespace Doner.Features.MarkdownFeature;
+namespace Doner.Features.MarkdownFeature.Repositories;
 
 public interface IMarkdownRepository
 {

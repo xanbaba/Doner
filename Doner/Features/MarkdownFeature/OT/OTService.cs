@@ -1,6 +1,7 @@
 using Doner.Features.MarkdownFeature.Locking;
+using Doner.Features.MarkdownFeature.Repositories;
 
-namespace Doner.Features.MarkdownFeature;
+namespace Doner.Features.MarkdownFeature.OT;
 
 /// <summary>
 /// Service for handling Operational Transformation operations

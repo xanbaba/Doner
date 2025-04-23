@@ -1,4 +1,4 @@
-namespace Doner.Features.MarkdownFeature.Redis;
+namespace Doner.Features.MarkdownFeature;
 
 public class RedisOptions
 {

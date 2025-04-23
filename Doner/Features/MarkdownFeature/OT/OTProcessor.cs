@@ -1,4 +1,6 @@
-namespace Doner.Features.MarkdownFeature;
+using Doner.Features.MarkdownFeature.Repositories;
+
+namespace Doner.Features.MarkdownFeature.OT;
 
 /// <summary>
 /// Implementation of the Operational Transformation processor

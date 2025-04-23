@@ -1,4 +1,6 @@
-namespace Doner.Features.MarkdownFeature;
+using Doner.Features.MarkdownFeature.OT;
+
+namespace Doner.Features.MarkdownFeature.Repositories;
 
 public interface IOperationRepository
 {

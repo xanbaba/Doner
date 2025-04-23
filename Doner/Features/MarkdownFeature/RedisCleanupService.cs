@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
 
-namespace Doner.Features.MarkdownFeature.Redis;
+namespace Doner.Features.MarkdownFeature;
 
 /// <summary>
 /// Background service that cleans up operations for expired sessions

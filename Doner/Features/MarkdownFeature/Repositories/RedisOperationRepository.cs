@@ -1,7 +1,8 @@
-using StackExchange.Redis;
 using System.Text.Json;
+using Doner.Features.MarkdownFeature.OT;
+using StackExchange.Redis;
 
-namespace Doner.Features.MarkdownFeature.Redis;
+namespace Doner.Features.MarkdownFeature.Repositories;
 
 public class RedisOperationRepository : IOperationRepository
 {

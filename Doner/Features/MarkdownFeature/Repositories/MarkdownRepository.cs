@@ -1,7 +1,7 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace Doner.Features.MarkdownFeature;
+namespace Doner.Features.MarkdownFeature.Repositories;
 
 public class MarkdownRepository : IMarkdownRepository
 {

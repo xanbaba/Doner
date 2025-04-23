@@ -82,7 +82,7 @@ public class RedisCleanupService : BackgroundService
             if (!sessionExists)
             {
                 // Session has expired, set an expiry on the operations key
-                var retention = _options.OperationRetention ?? TimeSpan.FromDays(1);
+                var retention = _options.OperationRetention;
                 await db.KeyExpireAsync(key, retention);
                 cleanedCount++;
             }

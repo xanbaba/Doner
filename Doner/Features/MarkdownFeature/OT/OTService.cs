@@ -28,12 +28,7 @@ public class OTService : IOTService
         _lockManager = lockManager;
     }
 
-    public Operation Transform(Operation clientOperation, Operation serverOperation)
-    {
-        return _otProcessor.Transform(clientOperation, serverOperation);
-    }
-
-    public async Task<ApplyOperationResult> ApplyOperationAsync(
+    private async Task<ApplyOperationResult> ApplyOperationAsync(
         string markdownId, 
         Operation operation, 
         CancellationToken cancellationToken = default)

@@ -28,9 +28,8 @@ public class OTService : IOTService
         _lockManager = lockManager;
     }
 
-    private async Task<ApplyOperationResult> ApplyOperationAsync(
-        string markdownId, 
-        Operation operation, 
+    private async Task ApplyOperationAsync(string markdownId,
+        Operation operation,
         CancellationToken cancellationToken = default)
     {
         // Create a resource key for this document
@@ -49,31 +48,19 @@ public class OTService : IOTService
             
             if (metadata == null)
             {
-                return new ApplyOperationResult 
-                { 
-                    Success = false, 
-                    ErrorMessage = "Markdown document not found" 
-                };
+                return;
             }
         
             // Check version - this check is now reliable because we have a lock
             if (operation.BaseVersion != metadata.Version)
             {
-                return new ApplyOperationResult 
-                { 
-                    Success = false, 
-                    ErrorMessage = "Operation base version does not match document version" 
-                };
+                return;
             }
         
             // Apply operation directly to the storage using the processor
             if (!await _otProcessor.ApplyComponentsAsync(markdownId, operation.Components, cancellationToken))
             {
-                return new ApplyOperationResult 
-                { 
-                    Success = false, 
-                    ErrorMessage = "Failed to apply operation to document content" 
-                };
+                return;
             }
             
             // Increment version
@@ -81,36 +68,20 @@ public class OTService : IOTService
             
             // Save the operation
             await _operationRepository.AddOperationAsync(operation, cancellationToken);
-            
-            // We can confidently set the new version to be the base version + 1
-            // since we hold an exclusive lock and just incremented it
-            int newVersion = metadata.Version + 1;
-            
-            return new ApplyOperationResult { Success = true, NewVersion = newVersion };
-            
+
             // The lock will be automatically released when exiting the using block
         }
         catch (TimeoutException)
         {
             // Could not acquire the lock within the timeout period
-            return new ApplyOperationResult 
-            { 
-                Success = false, 
-                ErrorMessage = "Document is currently being modified by another operation. Please try again." 
-            };
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             // An unexpected error occurred
-            return new ApplyOperationResult 
-            { 
-                Success = false, 
-                ErrorMessage = $"An error occurred while applying the operation: {ex.Message}" 
-            };
         }
     }
 
-    public async Task<ProcessOperationResult> ProcessOperationAsync(
+    public async Task<Operation?> ProcessOperationAsync(
         Operation operation, 
         CancellationToken cancellationToken = default)
     {
@@ -120,13 +91,7 @@ public class OTService : IOTService
             
         if (!markdownExists)
         {
-            return new ProcessOperationResult 
-            { 
-                Success = false,
-                ErrorMessage = "Markdown document not found",
-                TransformedOperation = null,
-                NewVersion = 0
-            };
+            return null;
         }
         
         // Get the current version of the document
@@ -136,16 +101,10 @@ public class OTService : IOTService
         // If the operation is already based on the latest version, apply it directly
         if (operation.BaseVersion == currentVersion)
         {
-            var applyResult = await ApplyOperationAsync(
+            await ApplyOperationAsync(
                 operation.MarkdownId, operation, cancellationToken);
-            
-            return new ProcessOperationResult 
-            { 
-                Success = applyResult.Success,
-                ErrorMessage = applyResult.ErrorMessage,
-                TransformedOperation = operation,
-                NewVersion = applyResult.NewVersion
-            };
+
+            return operation;
         }
         
         // Otherwise, the operation needs to be transformed against all operations
@@ -163,15 +122,9 @@ public class OTService : IOTService
         }
         
         // Apply the transformed operation (this will acquire a lock)
-        var result = await ApplyOperationAsync(
+        await ApplyOperationAsync(
             operation.MarkdownId, transformedOperation, cancellationToken);
-        
-        return new ProcessOperationResult 
-        { 
-            Success = result.Success,
-            ErrorMessage = result.ErrorMessage,
-            TransformedOperation = transformedOperation,
-            NewVersion = result.NewVersion
-        };
+
+        return transformedOperation;
     }
 }

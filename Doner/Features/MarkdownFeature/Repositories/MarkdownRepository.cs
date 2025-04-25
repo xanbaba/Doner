@@ -1,5 +1,6 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
+using static System.String;
 
 namespace Doner.Features.MarkdownFeature.Repositories;
 
@@ -28,23 +29,25 @@ public class MarkdownRepository : IMarkdownRepository
         }
     }
     
-    public async Task<string> GetMarkdownContentAsync(string markdownId, CancellationToken cancellationToken = default)
+    public async Task<DocumentState?> GetDocumentStateAsync(string markdownId, CancellationToken cancellationToken = default)
     {
         var filter = Builders<Markdown>.Filter.Eq(m => m.Id, markdownId);
         
         // Only project the content field to minimize data transfer
-        var projection = Builders<Markdown>.Projection.Include(m => m.Content);
+        var projection = Builders<Markdown>.Projection
+            .Include(m => m.Content)
+            .Include(m => m.Version);
         
         var document = await _markdownCollection.Find(filter)
-            .Project<ContentProjection>(projection)
+            .Project<Markdown>(projection)
             .FirstOrDefaultAsync(cancellationToken);
         
         if (document == null)
         {
-            return string.Empty;
+            return null;
         }
-
-        return string.Join("", document.Content);
+        
+        return new DocumentState {Content = Join("", document.Content), Version = document.Version};
     }
     
     public async Task<IEnumerable<Markdown>> GetMarkdownsByOwnerAsync(Guid ownerId, CancellationToken cancellationToken = default)
@@ -132,7 +135,7 @@ public class MarkdownRepository : IMarkdownRepository
     
     public async Task<bool> InsertContentAsync(string markdownId, int position, string text, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrEmpty(text))
+        if (IsNullOrEmpty(text))
         {
             return true; // Nothing to insert
         }
@@ -285,14 +288,9 @@ public class MarkdownRepository : IMarkdownRepository
     }
     
     // Helper classes for projections
-    private class ContentProjection
-    {
-        // ReSharper disable once CollectionNeverUpdated.Local
-        public List<char> Content { get; set; } = [];
-    }
-    
+
     private class ContentLengthProjection
     {
-        public int ContentLength { get; set; }
+        public int ContentLength { get; init; }
     }
 }

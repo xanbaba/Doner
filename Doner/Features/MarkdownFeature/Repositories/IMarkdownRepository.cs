@@ -3,7 +3,6 @@ namespace Doner.Features.MarkdownFeature.Repositories;
 public interface IMarkdownRepository
 {
     // Original methods
-    Task<string> GetMarkdownContentAsync(string markdownId, CancellationToken cancellationToken = default);
     Task<IEnumerable<Markdown>> GetMarkdownsByOwnerAsync(Guid ownerId, CancellationToken cancellationToken = default);
     Task CreateMarkdownAsync(string title, Guid ownerId, CancellationToken cancellationToken = default);
     Task UpdateMarkdownAsync(string markdownId, string title, CancellationToken cancellationToken = default);
@@ -47,4 +46,18 @@ public interface IMarkdownRepository
     /// <param name="cancellationToken"></param>
     /// <returns>True if the operation succeeded, false otherwise</returns>
     Task<bool> DeleteContentAsync(string markdownId, int position, int count, CancellationToken cancellationToken = default);
+    
+    /// <summary>
+    /// Gets the current state of a document including content and version
+    /// </summary>
+    /// <param name="markdownId">The ID of the markdown document</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Document state with content and version, or null if document doesn't exist</returns>
+    Task<DocumentState?> GetDocumentStateAsync(string markdownId, CancellationToken cancellationToken = default);
+}
+
+public class DocumentState
+{
+    public string Content { get; set; } = string.Empty;
+    public int Version { get; set; }
 }

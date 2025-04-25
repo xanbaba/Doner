@@ -1,3 +1,4 @@
+using Doner.Features.MarkdownFeature.Hubs;
 using Doner.Features.MarkdownFeature.Locking;
 using Doner.Features.MarkdownFeature.OT;
 using Doner.Features.MarkdownFeature.Repositories;
@@ -50,6 +51,6 @@ public class MarkdownFeature : IFeature
 
     public static void Configure(WebApplication app)
     {
-        
+        app.MapHub<MarkdownHub>("/hubs/markdown");
     }
 }

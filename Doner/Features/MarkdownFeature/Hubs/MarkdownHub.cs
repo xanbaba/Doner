@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json;
 using Doner.Features.MarkdownFeature.Hubs.Models;
 using Doner.Features.MarkdownFeature.OT;
 using Doner.Features.MarkdownFeature.Repositories;
@@ -71,22 +72,26 @@ public class MarkdownHub : Hub
     {
         try
         {
-            // TODO: Add authorization check to make sure user has access to this document
+            var documentMetadata = await _markdownRepository.GetMarkdownMetadataAsync(documentId);
             
-            // Get document content and version first to check if document exists
-            var documentState = await _markdownRepository.GetDocumentStateAsync(documentId);
-            
-            if (documentState == null)
+            if (documentMetadata == null)
             {
                 // Document doesn't exist, notify the client
-                await Clients.Caller.SendAsync("OperationError", 
-                    Guid.NewGuid().ToString(),
-                    $"Document with ID {documentId} does not exist.");
-                _logger.LogWarning("User attempted to join non-existent document {DocumentId}", documentId);
-                return;
+                throw new HubException(JsonSerializer.Serialize(new HubError(StatusCodes.Status404NotFound,
+                    $"Document with ID {documentId} does not exist.")));
             }
             
             var userId = Context.User!.GetUserId();
+            
+            if (documentMetadata.OwnerId != userId)
+            {
+                throw new HubException(JsonSerializer.Serialize(new HubError(StatusCodes.Status401Unauthorized,
+                    "You do not have permission to access this document.")));
+            }
+            
+            // Get document content and version first to check if document exists
+            var documentState = (await _markdownRepository.GetDocumentStateAsync(documentId))!;
+            
             var userInfo = new UserInfo
             {
                 UserId = userId,
@@ -191,10 +196,7 @@ public class MarkdownHub : Hub
             
             if (string.IsNullOrEmpty(documentId))
             {
-                await Clients.Caller.SendAsync("OperationError", 
-                    request.OperationId,
-                    "No active document for this connection. Join a document first.");
-                return;
+                throw new HubException(JsonSerializer.Serialize(new HubError(StatusCodes.Status400BadRequest, "You have not joined a document.")));
             }
             
             var userId = Context.User!.GetUserId();
@@ -215,10 +217,7 @@ public class MarkdownHub : Hub
             
             if (processedOperation == null)
             {
-                await Clients.Caller.SendAsync("OperationError", 
-                    request.OperationId, 
-                    "Operation could not be processed. Try syncing first.");
-                return;
+                throw new HubException(JsonSerializer.Serialize(new HubError(StatusCodes.Status404NotFound, "Document not found.")));
             }
             
             // Convert back to DTO for response
@@ -240,9 +239,7 @@ public class MarkdownHub : Hub
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing operation {OperationId}", request.OperationId);
-            await Clients.Caller.SendAsync("OperationError", 
-                request.OperationId, 
-                "An unexpected error occurred while processing the operation.");
+            throw new HubException(JsonSerializer.Serialize(new HubError(StatusCodes.Status500InternalServerError, "An error occurred while processing the operation.")));
         }
     }
     
@@ -271,10 +268,7 @@ public class MarkdownHub : Hub
                 if (documentState == null)
                 {
                     // Document may have been deleted
-                    await Clients.Caller.SendAsync("OperationError", 
-                        Guid.NewGuid().ToString(),
-                        $"Document with ID {documentId} no longer exists.");
-                    return;
+                    throw new HubException(JsonSerializer.Serialize(new HubError(StatusCodes.Status404NotFound, "Document no longer exists.")));
                 }
                 
                 await Clients.Caller.SendAsync("DocumentState", 
@@ -299,7 +293,7 @@ public class MarkdownHub : Hub
             }
             
             _logger.LogInformation("Sent {OperationCount} operations to sync client to version {ClientVersion} for document {DocumentId}",
-                operationsArray.Count(), operationsArray.Last().BaseVersion + 1, documentId);
+                operationsArray.Length, operationsArray.Last().BaseVersion + 1, documentId);
         }
         catch (Exception ex)
         {
@@ -417,18 +411,5 @@ public class MarkdownHub : Hub
             DeleteComponent delete => new ComponentDto { Type = ComponentType.Delete, Count = delete.Count },
             _ => throw new ArgumentException($"Unknown component type: {component.GetType().Name}")
         };
-    }
-}
-
-// Extension method to get user ID from claims
-public static class ClaimsPrincipalExtensions
-{
-    public static Guid GetUserId(this ClaimsPrincipal principal)
-    {
-        var claim = principal.FindFirst(ClaimTypes.NameIdentifier);
-        if (claim == null)
-            throw new InvalidOperationException("User ID claim not found");
-            
-        return Guid.Parse(claim.Value);
     }
 }

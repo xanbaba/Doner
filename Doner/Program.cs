@@ -3,6 +3,7 @@ using Doner.Features.AuthFeature;
 using Doner.Features.MarkdownFeature;
 using Doner.Features.ReelsFeature;
 using Doner.Features.WorkspaceFeature;
+using DotNetEnv;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
@@ -15,7 +16,7 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        DotNetEnv.Env.Load("../.env");
+        Env.Load("../.env");
         builder.Configuration.AddEnvironmentVariables();
 
         // Add services to the container.
@@ -25,6 +26,9 @@ public class Program
         builder.AddFeature<ReelsFeature>();
         builder.AddFeature<WorkspaceFeature>();
         builder.AddFeature<MarkdownFeature>();
+
+        builder.Services.AddSignalR();
+        
         builder.Services.AddDbContextFactory<AppDbContext>(optionsBuilder =>
         {
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");

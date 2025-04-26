@@ -1,10 +1,11 @@
-using System.Security.Claims;
 using System.Text.Json;
+using Doner.DataBase;
 using Doner.Features.MarkdownFeature.Hubs.Models;
 using Doner.Features.MarkdownFeature.OT;
 using Doner.Features.MarkdownFeature.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Doner.Features.MarkdownFeature.Hubs;
 
@@ -16,19 +17,22 @@ public class MarkdownHub : Hub
     private readonly IMarkdownRepository _markdownRepository;
     private readonly IOperationRepository _operationRepository;
     private readonly ILogger<MarkdownHub> _logger;
+    private readonly IDbContextFactory<AppDbContext> _dbContextFactory;
 
     public MarkdownHub(
         IConnectionTracker connectionTracker,
         IOTService otService,
         IMarkdownRepository markdownRepository,
         IOperationRepository operationRepository,
-        ILogger<MarkdownHub> logger)
+        ILogger<MarkdownHub> logger,
+        IDbContextFactory<AppDbContext> dbContextFactory)
     {
         _connectionTracker = connectionTracker;
         _otService = otService;
         _markdownRepository = markdownRepository;
         _operationRepository = operationRepository;
         _logger = logger;
+        _dbContextFactory = dbContextFactory;
     }
 
     public override async Task OnConnectedAsync()
@@ -89,14 +93,20 @@ public class MarkdownHub : Hub
                     "You do not have permission to access this document.")));
             }
             
-            // Get document content and version first to check if document exists
+            // Get document content and version
             var documentState = (await _markdownRepository.GetDocumentStateAsync(documentId))!;
             
+            // Create database context to retrieve user information
+            await using var dbContext = await _dbContextFactory.CreateDbContextAsync();
+            
+            // Retrieve user information from the database
+            // This will throw InvalidOperationException if user is not found
+            var user = dbContext.Users.First(u => u.Id == userId);
             var userInfo = new UserInfo
             {
                 UserId = userId,
-                DisplayName = Context.User!.Identity?.Name ?? "Unknown User",
-                Email = Context.User.FindFirstValue(ClaimTypes.Email),
+                DisplayName = user.FirstName,
+                Email = user.Email,
                 ConnectedAt = DateTime.UtcNow
             };
             

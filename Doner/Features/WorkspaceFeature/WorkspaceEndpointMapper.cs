@@ -12,7 +12,7 @@ namespace Doner.Features.WorkspaceFeature;
 
 public abstract class WorkspaceEndpointMapper: IEndpointMapper
 {
-    private const string WorkspaceNotFound = "A workspace with this name already exists.";
+    private const string WorkspaceNotFound = "Workspace does not exist.";
     private const string WorkspaceNameRequired = "Workspace name is required.";
     private const string WorkspaceAlreadyExists = "A workspace with this name already exists.";
     

@@ -15,7 +15,8 @@ public class WorkspaceServiceTests
     public WorkspaceServiceTests()
     {
         _workspaceRepositoryMock = new Mock<IWorkspaceRepository>();
-        _workspaceService = new WorkspaceService(_workspaceRepositoryMock.Object);
+        var appDbContextFactory = new AppDbContextFactory();
+        _workspaceService = new WorkspaceService(_workspaceRepositoryMock.Object, appDbContextFactory.CreateDbContext());
     }
 
     [Fact]

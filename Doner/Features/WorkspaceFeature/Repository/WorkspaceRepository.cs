@@ -11,7 +11,7 @@ public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactor
         await using var context = await dbContextFactory.CreateDbContextAsync();
         
         return context.Workspaces
-            .Where(w => w.OwnerId == ownerId).ToArray();
+            .Where(w => w.OwnerId == ownerId).OrderBy(x => x.CreatedAtUtc).ToArray();
     }
 
     public override async Task<Workspace?> GetAsync(Guid id)

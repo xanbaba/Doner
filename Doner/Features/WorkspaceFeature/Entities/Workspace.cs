@@ -11,6 +11,8 @@ public class Workspace
     
     public Guid OwnerId { get; set; }
     public User Owner { get; set; } = null!;
+    
+    public DateTime CreatedAtUtc { get; set; }
 
     public List<WorkspaceInvite> Invitees { get; set; } = null!;
 }

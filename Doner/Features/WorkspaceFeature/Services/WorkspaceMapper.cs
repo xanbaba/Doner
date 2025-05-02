@@ -12,7 +12,8 @@ public static class WorkspaceMapper
             Id = workspace.Id,
             Name = workspace.Name,
             Description = workspace.Description,
-            OwnerId = workspace.OwnerId
+            OwnerId = workspace.OwnerId,
+            CreatedAtUtc = workspace.CreatedAtUtc
         };
 
     public static WorkspacesResponse ToResponse(this IEnumerable<Workspace> workspaces) =>

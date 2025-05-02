@@ -52,6 +52,7 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository, AppDbCon
             return new Result<Guid>(new WorkspaceAlreadyExistsException());
         }
         
+        workspace.CreatedAtUtc = DateTime.UtcNow;
         await workspaceRepository.AddAsync(workspace);
         
         return workspace.Id;

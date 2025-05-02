@@ -1,3 +1,4 @@
+using Doner.Features.AuthFeature.Entities;
 using Doner.Features.WorkspaceFeature.Entities;
 using Doner.Features.WorkspaceFeature.Exceptions;
 using Doner.Features.WorkspaceFeature.Repository;
@@ -11,12 +12,13 @@ public class WorkspaceServiceTests
 {
     private readonly Mock<IWorkspaceRepository> _workspaceRepositoryMock;
     private readonly WorkspaceService _workspaceService;
+    private readonly AppDbContextFactory _appDbContextFactory;
 
     public WorkspaceServiceTests()
     {
         _workspaceRepositoryMock = new Mock<IWorkspaceRepository>();
-        var appDbContextFactory = new AppDbContextFactory();
-        _workspaceService = new WorkspaceService(_workspaceRepositoryMock.Object, appDbContextFactory.CreateDbContext());
+        _appDbContextFactory = new AppDbContextFactory();
+        _workspaceService = new WorkspaceService(_workspaceRepositoryMock.Object, _appDbContextFactory.CreateDbContext());
     }
 
     [Fact]
@@ -76,7 +78,19 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task CreateAsync_ShouldReturnWorkspaceId_WhenWorkspaceIsCreated()
     {
-        var workspace = new Workspace { Name = "New Workspace", OwnerId = Guid.NewGuid() };
+        await using var appDbContext = _appDbContextFactory.CreateDbContext();
+        var userId = Guid.NewGuid();
+        appDbContext.Users.Add(new User
+        {
+            Id = userId,
+            Email = "test@gmail.com",
+            Login = "test",
+            Username = "test",
+            PasswordHash = [],
+            PasswordSalt = []
+        });
+        await appDbContext.SaveChangesAsync();
+        var workspace = new Workspace { Name = "New Workspace", OwnerId = userId };
         _workspaceRepositoryMock.Setup(r => r.Exists(workspace.OwnerId, workspace.Name)).ReturnsAsync(false);
         _workspaceRepositoryMock.Setup(r => r.AddAsync(It.IsAny<Workspace>())).ReturnsAsync(workspace.Id);
 
@@ -89,7 +103,20 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task CreateAsync_ShouldReturnWorkspaceAlreadyExistsException_WhenWorkspaceWithSameNameExists()
     {
-        var workspace = new Workspace { Name = "Existing Workspace", OwnerId = Guid.NewGuid() };
+        await using var appDbContext = _appDbContextFactory.CreateDbContext();
+        var userId = Guid.NewGuid();
+        appDbContext.Users.Add(new User
+        {
+            Id = userId,
+            Email = "test@gmail.com",
+            Login = "test",
+            Username = "test",
+            PasswordHash = [],
+            PasswordSalt = []
+        });
+        await appDbContext.SaveChangesAsync();
+
+        var workspace = new Workspace { Name = "Existing Workspace", OwnerId = userId };
         _workspaceRepositoryMock.Setup(r => r.Exists(workspace.OwnerId, workspace.Name)).ReturnsAsync(true);
 
         var result = await _workspaceService.CreateAsync(workspace);

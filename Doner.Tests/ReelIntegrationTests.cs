@@ -1,4 +1,5 @@
-﻿using Doner.Features.ReelsFeature;
+﻿using Doner.Features.AuthFeature.Entities;
+using Doner.Features.ReelsFeature;
 using Doner.Features.ReelsFeature.Elements;
 using Doner.Features.ReelsFeature.Repository;
 using Doner.Features.ReelsFeature.Services;
@@ -20,6 +21,7 @@ public class ReelIntegrationTests : IDisposable
     private readonly IMongoCollection<Reel> _reelCollection;
     private readonly ReelService _reelService;
     private readonly WorkspaceService _workspaceService;
+    private readonly AppDbContextFactory _appDbContextFactory;
 
     public ReelIntegrationTests()
     {
@@ -37,9 +39,9 @@ public class ReelIntegrationTests : IDisposable
             new DropdownValidator(),
             new PlainTextValidator()
         );
-        var appDbContextFactory = new AppDbContextFactory();
-        var workspaceRepository = new WorkspaceRepository(appDbContextFactory);
-        _workspaceService = new WorkspaceService(workspaceRepository, appDbContextFactory.CreateDbContext());
+        _appDbContextFactory = new AppDbContextFactory();
+        var workspaceRepository = new WorkspaceRepository(_appDbContextFactory);
+        _workspaceService = new WorkspaceService(workspaceRepository, _appDbContextFactory.CreateDbContext());
         _reelService = new ReelService(reelRepository, reelValidator, reelElementValidator, _workspaceService);
     }
 
@@ -157,6 +159,19 @@ public class ReelIntegrationTests : IDisposable
     public async Task GetByWorkspaceAsync_ShouldReturnReels_WhenUserIsWorkspaceOwner()
     {
         var userId = Guid.NewGuid();
+
+        await using var appDbContext = _appDbContextFactory.CreateDbContext();
+        appDbContext.Users.Add(new User
+        {
+            Id = userId,
+            Email = "test@gmail.com",
+            Login = "test",
+            Username = "test",
+            PasswordHash = [],
+            PasswordSalt = []
+        });
+        await appDbContext.SaveChangesAsync();
+
         var workspace = new Workspace
         {
             Name = "Test Workspace",
@@ -178,6 +193,17 @@ public class ReelIntegrationTests : IDisposable
     public async Task GetByWorkspaceAsync_ShouldThrowUnauthorizedAccessException_WhenUserIsNotWorkspaceOwner()
     {
         var userId = Guid.NewGuid();
+        await using var appDbContext = _appDbContextFactory.CreateDbContext();
+        appDbContext.Users.Add(new User
+        {
+            Id = userId,
+            Email = "test@gmail.com",
+            Login = "test",
+            Username = "test",
+            PasswordHash = [],
+            PasswordSalt = []
+        });
+        await appDbContext.SaveChangesAsync();
         var workspace = new Workspace
         {
             Name = "Test Workspace",

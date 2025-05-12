@@ -18,6 +18,6 @@ public interface IWorkspaceRepository
     Task<bool> Exists(Guid workspaceId);
     
     Task<bool> Exists(Guid ownerId, string workspaceName);
-
+    Task<bool> IsUserInWorkspaceAsync(Guid workspaceId, Guid userId);
 
 }

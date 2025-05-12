@@ -47,6 +47,8 @@ public class MarkdownFeature : IFeature
             var db = sp.GetRequiredService<IMongoDatabase>();
             return db.GetCollection<Markdown>("Markdowns");
         });
+        
+        builder.Services.AddScoped<IConnectionTracker, RedisConnectionTracker>();
     }
 
     public static void Configure(WebApplication app)

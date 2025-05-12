@@ -19,6 +19,19 @@ public class Program
         Env.Load("../.env");
         builder.Configuration.AddEnvironmentVariables();
 
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("CorsPolicy", x =>
+            {
+                x
+                    .WithOrigins("http://127.0.0.1:5500") // Your client app's origin
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials(); // Important for SignalR connections
+            });
+        });
+
+        
         // Add services to the container.
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
@@ -28,22 +41,23 @@ public class Program
         builder.AddFeature<MarkdownFeature>();
 
         builder.Services.AddSignalR();
-        
+
         builder.Services.AddDbContextFactory<AppDbContext>(optionsBuilder =>
         {
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
             optionsBuilder.UseSqlServer(connectionString);
         });
-        builder.Services.AddSingleton(_ => new MongoClient(builder.Configuration.GetConnectionString("MongoDb")).GetDatabase("Doner"));
+        builder.Services.AddSingleton(_ =>
+            new MongoClient(builder.Configuration.GetConnectionString("MongoDb")).GetDatabase("Doner"));
         builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
         var app = builder.Build();
 
         if (!app.Environment.IsEnvironment("Testing"))
         {
-            app.MigrateDatabase<AppDbContext>();
+            // app.MigrateDatabase<AppDbContext>();
             // app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureDeleted();
-            // app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
+            app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
         }
 
         // Configure the HTTP request pipeline.
@@ -51,7 +65,9 @@ public class Program
         {
             app.MapOpenApi();
         }
+
         app.UseHttpsRedirection();
+        app.UseCors("CorsPolicy");
         app.UseMiddleware<ExceptionHandlingMiddleware>();
         app.UseFeature<AuthFeature>();
         app.UseFeature<ReelsFeature>();

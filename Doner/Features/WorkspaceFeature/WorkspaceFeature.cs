@@ -13,6 +13,7 @@ public class WorkspaceFeature: IFeature
         builder.Services.AddScoped<IWorkspaceService, WorkspaceService>();
         builder.Services.AddScoped<IEmailService, EmailService>();
         builder.Services.AddScoped<IInviteTokenService, InviteTokenService>();
+        builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
     }
 
     public static void Configure(WebApplication app)

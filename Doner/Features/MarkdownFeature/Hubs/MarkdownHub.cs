@@ -1,8 +1,10 @@
 using System.Text.Json;
 using Doner.DataBase;
 using Doner.Features.MarkdownFeature.Hubs.Models;
+using Doner.Features.MarkdownFeature.Locking;
 using Doner.Features.MarkdownFeature.OT;
 using Doner.Features.MarkdownFeature.Repositories;
+using Doner.Features.WorkspaceFeature.Repository;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
@@ -16,14 +18,24 @@ public class MarkdownHub : Hub
     private readonly IOTService _otService;
     private readonly IMarkdownRepository _markdownRepository;
     private readonly IOperationRepository _operationRepository;
+    private readonly IWorkspaceRepository _workspaceRepository;
+    private readonly IDistributedLockManager _lockManager;
     private readonly ILogger<MarkdownHub> _logger;
     private readonly IDbContextFactory<AppDbContext> _dbContextFactory;
+
+    // Default timeout values
+    private static readonly TimeSpan OperationLockTimeout = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan JoinLockTimeout = TimeSpan.FromSeconds(10);
+    private static readonly TimeSpan SyncLockTimeout = TimeSpan.FromSeconds(15);
+    private static readonly TimeSpan LeaveLockTimeout = TimeSpan.FromSeconds(5);
 
     public MarkdownHub(
         IConnectionTracker connectionTracker,
         IOTService otService,
         IMarkdownRepository markdownRepository,
         IOperationRepository operationRepository,
+        IWorkspaceRepository workspaceRepository,
+        IDistributedLockManager lockManager,
         ILogger<MarkdownHub> logger,
         IDbContextFactory<AppDbContext> dbContextFactory)
     {
@@ -31,6 +43,8 @@ public class MarkdownHub : Hub
         _otService = otService;
         _markdownRepository = markdownRepository;
         _operationRepository = operationRepository;
+        _workspaceRepository = workspaceRepository;
+        _lockManager = lockManager;
         _logger = logger;
         _dbContextFactory = dbContextFactory;
     }
@@ -80,17 +94,26 @@ public class MarkdownHub : Hub
             
             if (documentMetadata == null)
             {
-                // Document doesn't exist, notify the client
-                throw new HubException(JsonSerializer.Serialize(new HubError(StatusCodes.Status404NotFound,
-                    $"Document with ID {documentId} does not exist.")));
+                throw CreateHubException(StatusCodes.Status404NotFound,
+                    $"Document with ID {documentId} does not exist.");
             }
             
             var userId = Context.User!.GetUserId();
             
-            if (documentMetadata.OwnerId != userId)
+            // Check if user is owner OR has access to the workspace
+            bool hasAccess = documentMetadata.OwnerId == userId;
+            
+            if (!hasAccess)
             {
-                throw new HubException(JsonSerializer.Serialize(new HubError(StatusCodes.Status401Unauthorized,
-                    "You do not have permission to access this document.")));
+                // Check workspace access if not owner
+                var workspaceId = documentMetadata.WorkspaceId;
+                hasAccess = await _workspaceRepository.IsUserInWorkspaceAsync(workspaceId, userId);
+            }
+            
+            if (!hasAccess)
+            {
+                throw CreateHubException(StatusCodes.Status403Forbidden,
+                    "You do not have permission to access this document.");
             }
             
             // Get document content and version
@@ -148,7 +171,6 @@ public class MarkdownHub : Hub
             
             // Notify other users that this user has joined
             await Clients.OthersInGroup(GetDocumentGroupName(documentId)).SendAsync("UserJoined", 
-                userId.ToString(),
                 new UserInfoResponse
                 {
                     UserId = userInfo.UserId.ToString(),
@@ -162,7 +184,8 @@ public class MarkdownHub : Hub
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error joining document {DocumentId}", documentId);
-            throw;
+            throw CreateHubException(StatusCodes.Status500InternalServerError,
+                "An error occurred while joining the document.");
         }
     }
     
@@ -192,7 +215,8 @@ public class MarkdownHub : Hub
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error leaving document");
-            throw;
+            throw CreateHubException(StatusCodes.Status500InternalServerError,
+                "An error occurred while leaving the document.");
         }
     }
     
@@ -206,7 +230,8 @@ public class MarkdownHub : Hub
             
             if (string.IsNullOrEmpty(documentId))
             {
-                throw new HubException(JsonSerializer.Serialize(new HubError(StatusCodes.Status400BadRequest, "You have not joined a document.")));
+                throw CreateHubException(StatusCodes.Status400BadRequest, 
+                    "You have not joined a document.");
             }
             
             var userId = Context.User!.GetUserId();
@@ -222,12 +247,18 @@ public class MarkdownHub : Hub
                 Timestamp = DateTime.UtcNow
             };
             
-            // Process the operation (apply OT, persist, etc.)
+            // Acquire lock for document modification
+            var lockKey = $"markdown:{documentId}";
+            
+            await using var opLock = await _lockManager.AcquireLockAsync(
+                lockKey, OperationLockTimeout);
+            
+            // Process the operation with locking protection
             var processedOperation = await _otService.ProcessOperationAsync(operation);
             
             if (processedOperation == null)
             {
-                throw new HubException(JsonSerializer.Serialize(new HubError(StatusCodes.Status404NotFound, "Document not found.")));
+                throw CreateHubException(StatusCodes.Status404NotFound, "Document not found.");
             }
             
             // Convert back to DTO for response
@@ -246,10 +277,16 @@ public class MarkdownHub : Hub
             _logger.LogInformation("Operation {OperationId} processed for document {DocumentId}", 
                 request.OperationId, documentId);
         }
+        catch (TimeoutException)
+        {
+            throw CreateHubException(StatusCodes.Status503ServiceUnavailable,
+                "The document is currently busy. Please try again later.");
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing operation {OperationId}", request.OperationId);
-            throw new HubException(JsonSerializer.Serialize(new HubError(StatusCodes.Status500InternalServerError, "An error occurred while processing the operation.")));
+            throw CreateHubException(StatusCodes.Status500InternalServerError,
+                "An error occurred while processing the operation.");
         }
     }
     
@@ -278,7 +315,7 @@ public class MarkdownHub : Hub
                 if (documentState == null)
                 {
                     // Document may have been deleted
-                    throw new HubException(JsonSerializer.Serialize(new HubError(StatusCodes.Status404NotFound, "Document no longer exists.")));
+                    throw CreateHubException(StatusCodes.Status404NotFound, "Document no longer exists.");
                 }
                 
                 await Clients.Caller.SendAsync("DocumentState", 
@@ -308,7 +345,8 @@ public class MarkdownHub : Hub
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error syncing client to version {ClientVersion}", clientVersion);
-            throw;
+            throw CreateHubException(StatusCodes.Status500InternalServerError,
+                "An error occurred while syncing the document.");
         }
     }
     
@@ -394,12 +432,19 @@ public class MarkdownHub : Hub
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error stopping typing indicator");
+            throw CreateHubException(StatusCodes.Status500InternalServerError,
+                "Failed to update typing status");
         }
     }
     
     // Helper methods
     
     private static string GetDocumentGroupName(string documentId) => $"document:{documentId}";
+    
+    private static HubException CreateHubException(int statusCode, string message)
+    {
+        return new HubException(JsonSerializer.Serialize(new HubError(statusCode, message)));
+    }
     
     private static OperationComponent MapToOperationComponent(ComponentDto component)
     {

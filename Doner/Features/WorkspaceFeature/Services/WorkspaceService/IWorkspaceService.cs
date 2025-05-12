@@ -19,4 +19,5 @@ public interface IWorkspaceService
     Task<Result<Unit>> RemoveAsync(Workspace workspace, Guid userId);
     Task<Result<Unit>> InviteUserAsync(Guid workspaceId, Guid userId, string email);
     Task<Result<Unit>> InviteUserAsync(Workspace workspace, Guid userId, string email);
+    Task<Result<Unit>> AcceptInviteAsync(Guid userId, string token);
 }

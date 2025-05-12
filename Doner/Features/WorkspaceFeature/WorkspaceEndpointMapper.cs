@@ -21,7 +21,9 @@ public abstract class WorkspaceEndpointMapper : IEndpointMapper
     private const string WorkspaceNameRequired = "Workspace name is required.";
     private const string WorkspaceAlreadyExists = "A workspace with this name already exists.";
     private const string WorkspaceInviteAlreadyExists = "Invite to this user already exists.";
-    private const string InviteIsNotValid = "Invite is invalid.";
+    private const string UserNotFound = "User is not found.";
+    private const string InvalidInviteToken = "Invite token is invalid.";
+    private const string UnableToAcceptInvite = "Unable to accept invite.";
 
     public static void Map(IEndpointRouteBuilder builder)
     {
@@ -32,6 +34,7 @@ public abstract class WorkspaceEndpointMapper : IEndpointMapper
         workspacesGroup.MapPost("/", AddWorkspace);
         workspacesGroup.MapPut("/{id:guid}", UpdateWorkspace);
         workspacesGroup.MapDelete("/{id:guid}", RemoveWorkspace);
+        workspacesGroup.MapPost("/{id:guid}/invite", InviteUser);
     }
 
 
@@ -131,7 +134,7 @@ public abstract class WorkspaceEndpointMapper : IEndpointMapper
         );
     }
 
-    private static async Task<Results<NotFound<string>, NoContent, BadRequest<string>>> InviteUserAsync(
+    private static async Task<Results<NotFound<string>, NoContent, BadRequest<string>>> InviteUser(
         [FromServices] IWorkspaceService workspaceService,
         [FromBody] InviteRequest request,
         [FromRoute] Guid id,
@@ -149,18 +152,29 @@ public abstract class WorkspaceEndpointMapper : IEndpointMapper
                     WorkspaceNotFoundException => TypedResults.NotFound(WorkspaceNotFound),
                     PermissionDeniedException => TypedResults.BadRequest(SharedResources.PermissionDenied),
                     WorkspaceInviteAlreadyExistsException => TypedResults.BadRequest(WorkspaceInviteAlreadyExists),
+                    UserNotFoundException => TypedResults.NotFound(UserNotFound),
                     _ => throw exception
                 };
             }
         );
     }
 
-    // private static async Task<Results<NotFound<string>, NoContent, BadRequest<string>>> AcceptInviteAsync(
-    //     [FromServices] IInviteLinkService inviteLinkService,
-    //     [FromRoute] string encrypted,
-    //     ClaimsPrincipal user
-    // )
-    // {
-    //     
-    // }
+    private static async Task<Results<NoContent, BadRequest<string>, NotFound<string>>> AcceptInviteAsync(
+        [FromServices] IWorkspaceService workspaceService,
+        [FromRoute] string token,
+        ClaimsPrincipal user
+    )
+    {
+        var result = await workspaceService.AcceptInviteAsync(user.GetUserId(), token);
+
+        return result.Match<Results<NoContent, BadRequest<string>, NotFound<string>>>(
+            _ => TypedResults.NoContent(),
+            exception => exception switch
+            {
+                InvalidInviteTokenException => TypedResults.BadRequest(InvalidInviteToken),
+                UnableToAcceptInviteException => TypedResults.BadRequest(UnableToAcceptInvite),
+                WorkspaceNotFoundException => TypedResults.NotFound(WorkspaceNotFound),
+                _ => throw exception
+            });
+    }
 }

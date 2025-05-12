@@ -1,16 +1,19 @@
 using System.Text;
+using Contracts.V1.Requests;
 using Doner.DataBase;
+using Doner.Features.AuthFeature.Entities;
 using Doner.Features.WorkspaceFeature.Entities;
 using Doner.Features.WorkspaceFeature.Exceptions;
 using Doner.Features.WorkspaceFeature.Repository;
 using Doner.Features.WorkspaceFeature.Services.EmailService;
 using Doner.Features.WorkspaceFeature.Services.InviteLinkService;
+using FluentValidation;
 using LanguageExt;
 using LanguageExt.Common;
 
 namespace Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 
-public class WorkspaceService(IWorkspaceRepository workspaceRepository, IInviteLinkService inviteLinkService, IEmailService emailService, AppDbContext dbContext): WorkspaceServiceBase
+public class WorkspaceService(IWorkspaceRepository workspaceRepository, IInviteTokenService inviteTokenService, IEmailService emailService, AppDbContext dbContext): WorkspaceServiceBase
 {
     public override async Task<Result<IEnumerable<Workspace>>> GetByOwnerAsync(Guid ownerId)
     {
@@ -102,14 +105,9 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository, IInviteL
     {
         var workspace = await workspaceRepository.GetAsync(workspaceId);
 
-        if (workspace == null)
+        if (workspace is null)
         {
             return new Result<Unit>(new WorkspaceNotFoundException());
-        }
-
-        if (string.IsNullOrEmpty(email))
-        {
-            return new Result<Unit>(new ArgumentNullException());
         }
         
         if (workspace.OwnerId != userId)
@@ -124,16 +122,50 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository, IInviteL
             return new Result<Unit>(new WorkspaceInviteAlreadyExistsException());
         }
         
-        var userToInvite = dbContext.Users.SingleOrDefault(u => u.Id == userId);
+        var userToInvite = dbContext.Users.SingleOrDefault(u => u.Email == email);
 
-        if (userToInvite == null)
+        if (userToInvite is null)
         {
-            return new Result<Unit>(new ArgumentNullException());
+            return new Result<Unit>(new UserNotFoundException());
         }
         
-        var link = inviteLinkService.GenerateLink(workspace.Id, userToInvite.Id);
+        var token = inviteTokenService.GenerateToken(workspace.Id, userToInvite.Id);
+        var link = $"https://localhost:3000/api/v1/users/me/workspaces/accept/{token}";
         
         await emailService.SendEmailInviteAsync(email, userToInvite.FirstName, link);
+        
+        return Unit.Default;
+    }
+
+    public override async Task<Result<Unit>> AcceptInviteAsync(Guid userId, string token)
+    {
+        var decrypted = inviteTokenService.DecryptToken(token);
+
+        if (decrypted is null)
+        {
+            return new Result<Unit>(new InvalidInviteTokenException());
+        }
+
+        var (invitedUserId, workspaceId) = decrypted.Value;
+
+        if (invitedUserId != userId)
+        {
+            return new Result<Unit>(new UnableToAcceptInviteException());
+        }
+        
+        var workspace = await workspaceRepository.GetAsync(workspaceId);
+
+        if (workspace is null)
+        {
+            return new Result<Unit>(new WorkspaceNotFoundException());
+        }
+
+        dbContext.WorkspaceInvites.Add(new WorkspaceInvite()
+        {
+            UserId = invitedUserId,
+            WorkspaceId = workspaceId
+        });
+        await dbContext.SaveChangesAsync();
         
         return Unit.Default;
     }

@@ -27,4 +27,6 @@ public abstract class WorkspaceServiceBase: IWorkspaceService
     {
         return await InviteUserAsync(workspace.Id, userId, email);
     }
+
+    public abstract Task<Result<Unit>> AcceptInviteAsync(Guid userId, string token);
 }

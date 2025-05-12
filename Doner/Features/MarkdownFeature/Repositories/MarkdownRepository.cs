@@ -65,7 +65,7 @@ public class MarkdownRepository : IMarkdownRepository
         return markdowns;
     }
     
-    public async Task CreateMarkdownAsync(string title, Guid ownerId, CancellationToken cancellationToken = default)
+    public async Task CreateMarkdownAsync(string title, Guid ownerId, Guid workspaceId, CancellationToken cancellationToken = default)
     {
         var markdown = new Markdown
         {
@@ -73,7 +73,8 @@ public class MarkdownRepository : IMarkdownRepository
             Title = title,
             CreatedAt = DateTime.UtcNow,
             Version = 0,
-            Content = []
+            Content = [],
+            WorkspaceId = workspaceId
         };
         
         await _markdownCollection.InsertOneAsync(markdown, null, cancellationToken);

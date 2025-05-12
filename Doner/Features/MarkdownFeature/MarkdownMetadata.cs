@@ -10,4 +10,5 @@ public class MarkdownMetadata
     public string Title { get; set; } = "";
     public DateTime CreatedAt { get; set; }
     public int Version { get; set; }
+    public Guid WorkspaceId { get; set; }
 }

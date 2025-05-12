@@ -12,6 +12,9 @@ public class Markdown
     [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid OwnerId { get; set; }
     
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
+    public Guid WorkspaceId { get; set; }
+    
     public string Title { get; set; } = "";
 
     public List<char> Content { get; set; } = [];

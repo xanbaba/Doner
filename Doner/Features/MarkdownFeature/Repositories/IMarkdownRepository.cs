@@ -4,7 +4,7 @@ public interface IMarkdownRepository
 {
     // Original methods
     Task<IEnumerable<Markdown>> GetMarkdownsByOwnerAsync(Guid ownerId, CancellationToken cancellationToken = default);
-    Task CreateMarkdownAsync(string title, Guid ownerId, CancellationToken cancellationToken = default);
+    Task CreateMarkdownAsync(string title, Guid ownerId, Guid workspaceId, CancellationToken cancellationToken = default);
     Task UpdateMarkdownAsync(string markdownId, string title, CancellationToken cancellationToken = default);
     Task DeleteMarkdownAsync(string markdownId, CancellationToken cancellationToken = default);
     

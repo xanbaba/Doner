@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Doner.Features.WorkspaceFeature.Repository;
 
-public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactory): WorkspaceRepositoryBase
+public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactory): IWorkspaceRepository
 {
-    public override async Task<IEnumerable<Workspace>> GetByOwnerAsync(Guid ownerId)
+    public async Task<IEnumerable<Workspace>> GetByOwnerAsync(Guid ownerId)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
         
@@ -14,14 +14,14 @@ public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactor
             .Where(w => w.OwnerId == ownerId).ToArray();
     }
 
-    public override async Task<Workspace?> GetAsync(Guid id)
+    public async Task<Workspace?> GetAsync(Guid id)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
         
         return context.Workspaces.FirstOrDefault(w => w.Id == id);
     }
 
-    public override async Task<Guid> AddAsync(Workspace workspace)
+    public async Task<Guid> AddAsync(Workspace workspace)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
         
@@ -32,7 +32,7 @@ public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactor
         return workspaceId;
     }
 
-    public override async Task UpdateAsync(Guid id, Workspace workspace)
+    public async Task UpdateAsync(Guid id, Workspace workspace)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
         
@@ -48,7 +48,12 @@ public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactor
         await context.SaveChangesAsync();
     }
 
-    public override async Task RemoveAsync(Guid id)
+    public Task UpdateAsync(Workspace workspace)
+    {
+        return UpdateAsync(workspace.Id, workspace);
+    }
+
+    public async Task RemoveAsync(Guid id)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
         var workspace = context.Workspaces.FirstOrDefault(x => x.Id == id);
@@ -60,8 +65,13 @@ public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactor
         
         await context.SaveChangesAsync();
     }
-    
-    public override async Task<bool> Exists(Guid workspaceId)
+
+    public Task RemoveAsync(Workspace workspace)
+    {
+        return RemoveAsync(workspace.Id);
+    }
+
+    public async Task<bool> Exists(Guid workspaceId)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
 
@@ -69,10 +79,24 @@ public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactor
             .Any(w => w.Id == workspaceId);
     }
     
-    public override async Task<bool> Exists(Guid ownerId, string workspaceName)
+    public async Task<bool> Exists(Guid ownerId, string workspaceName)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
         
         return context.Workspaces.Any(w => w.OwnerId == ownerId && w.Name == workspaceName);
+    }
+    
+    public async Task<bool> IsUserInWorkspaceAsync(Guid workspaceId, Guid userId)
+    {
+        await using var context = await dbContextFactory.CreateDbContextAsync();
+        
+        // Check if user is the owner of the workspace
+        if (context.Workspaces.Any(w => w.Id == workspaceId && w.OwnerId == userId))
+        {
+            return true;
+        }
+        
+        // Check if user is invited to the workspace through workspace members
+        return context.WorkspaceInvites.Any(m => m.WorkspaceId == workspaceId && m.UserId == userId);
     }
 }

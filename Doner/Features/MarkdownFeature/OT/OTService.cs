@@ -1,4 +1,3 @@
-using Doner.Features.MarkdownFeature.Locking;
 using Doner.Features.MarkdownFeature.Repositories;
 
 namespace Doner.Features.MarkdownFeature.OT;
@@ -11,74 +10,46 @@ public class OTService : IOTService
     private readonly IOperationRepository _operationRepository;
     private readonly IMarkdownRepository _markdownRepository;
     private readonly IOTProcessor _otProcessor;
-    private readonly IDistributedLockManager _lockManager;
-    
-    // Default timeout for acquiring a document lock
-    private static readonly TimeSpan DefaultLockTimeout = TimeSpan.FromSeconds(30);
 
     public OTService(
         IOperationRepository operationRepository, 
         IMarkdownRepository markdownRepository,
-        IOTProcessor otProcessor,
-        IDistributedLockManager lockManager)
+        IOTProcessor otProcessor)
     {
         _operationRepository = operationRepository;
         _markdownRepository = markdownRepository;
         _otProcessor = otProcessor;
-        _lockManager = lockManager;
     }
 
     private async Task ApplyOperationAsync(string markdownId,
         Operation operation,
         CancellationToken cancellationToken = default)
     {
-        // Create a resource key for this document
-        string lockKey = $"markdown:{markdownId}";
+        // Check if markdown exists and get its metadata (without content)
+        var metadata = await _markdownRepository.GetMarkdownMetadataAsync(markdownId, cancellationToken);
         
-        try
+        if (metadata == null)
         {
-            // Acquire a lock for this document
-            await using var docLock = await _lockManager.AcquireLockAsync(
-                lockKey, DefaultLockTimeout, cancellationToken);
-                
-            // Now we have exclusive access to modify this document
-            
-            // Check if markdown exists and get its metadata (without content)
-            var metadata = await _markdownRepository.GetMarkdownMetadataAsync(markdownId, cancellationToken);
-            
-            if (metadata == null)
-            {
-                return;
-            }
+            return;
+        }
+    
+        // Check version - this check should be protected by a lock at the caller level
+        if (operation.BaseVersion != metadata.Version)
+        {
+            return;
+        }
+    
+        // Apply operation directly to the storage using the processor
+        if (!await _otProcessor.ApplyComponentsAsync(markdownId, operation.Components, cancellationToken))
+        {
+            return;
+        }
         
-            // Check version - this check is now reliable because we have a lock
-            if (operation.BaseVersion != metadata.Version)
-            {
-                return;
-            }
+        // Increment version
+        await _markdownRepository.IncrementVersionAsync(markdownId, cancellationToken);
         
-            // Apply operation directly to the storage using the processor
-            if (!await _otProcessor.ApplyComponentsAsync(markdownId, operation.Components, cancellationToken))
-            {
-                return;
-            }
-            
-            // Increment version
-            await _markdownRepository.IncrementVersionAsync(markdownId, cancellationToken);
-            
-            // Save the operation
-            await _operationRepository.AddOperationAsync(operation, cancellationToken);
-
-            // The lock will be automatically released when exiting the using block
-        }
-        catch (TimeoutException)
-        {
-            // Could not acquire the lock within the timeout period
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            // An unexpected error occurred
-        }
+        // Save the operation
+        await _operationRepository.AddOperationAsync(operation, cancellationToken);
     }
 
     public async Task<Operation?> ProcessOperationAsync(

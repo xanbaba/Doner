@@ -1,5 +1,5 @@
 using System.Text.Json;
-using Doner.Features.AuthFeature.Entities;
+using Doner.DataBase;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
 
@@ -8,7 +8,7 @@ namespace Doner.Features.MarkdownFeature;
 public class RedisConnectionTracker : IConnectionTracker
 {
     private readonly IDatabase _db;
-    private readonly DbContext _dbContext;
+    private readonly AppDbContext _dbContext;
     
     // Redis key prefixes
     private const string ConnectionMappingKey = "markdown:connections";
@@ -16,7 +16,7 @@ public class RedisConnectionTracker : IConnectionTracker
     private const string UserInfoMappingKey = "markdown:connections:userinfo";
     private const string ActiveDocumentsKey = "markdown:active_documents";
     
-    public RedisConnectionTracker(IConnectionMultiplexer redis, DbContext dbContext)
+    public RedisConnectionTracker(IConnectionMultiplexer redis, AppDbContext dbContext)
     {
         _db = redis.GetDatabase();
         _dbContext = dbContext;
@@ -25,7 +25,7 @@ public class RedisConnectionTracker : IConnectionTracker
     public async Task TrackConnectionAsync(string connectionId, string documentId, Guid userId)
     {
         // Fetch user data from database
-        var user = await _dbContext.Set<User>()
+        var user = await _dbContext.Users
             .FirstOrDefaultAsync(u => u.Id == userId);
         
         if (user == null)

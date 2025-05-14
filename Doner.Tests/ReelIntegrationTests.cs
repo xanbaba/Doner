@@ -1,6 +1,5 @@
 ﻿using Doner.Features.AuthFeature.Entities;
 using Doner.Features.ReelsFeature;
-using Doner.Features.ReelsFeature.Elements;
 using Doner.Features.ReelsFeature.Repository;
 using Doner.Features.ReelsFeature.Services;
 using Doner.Features.ReelsFeature.Validation;
@@ -32,17 +31,10 @@ public class ReelIntegrationTests : IDisposable
 
         var reelRepository = new ReelRepository(_reelCollection);
         IValidator<Reel> reelValidator = new ReelValidator();
-        IValidator<ReelElement> reelElementValidator = new CompositeReelElementValidator
-        (
-            new PictureValidator(),
-            new CheckboxValidator(),
-            new DropdownValidator(),
-            new PlainTextValidator()
-        );
         _appDbContextFactory = new AppDbContextFactory();
         var workspaceRepository = new WorkspaceRepository(_appDbContextFactory);
         _workspaceService = new WorkspaceService(workspaceRepository, _appDbContextFactory.CreateDbContext());
-        _reelService = new ReelService(reelRepository, reelValidator, reelElementValidator, _workspaceService);
+        _reelService = new ReelService(reelRepository, reelValidator, _workspaceService);
     }
 
     [Fact]

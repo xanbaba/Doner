@@ -137,8 +137,7 @@ public class ReelRepositoryTests : IDisposable
 
         var result = await _repository.GetReelElementAsync(reel.Id, element.Id);
         result.Should().NotBeNull();
-        result.Should().BeOfType<PlainText>();
-        ((PlainText)result).Text.Should().Be(element.Text);
+        result.Data.Should().Be(element.Data);
         result.Id.Should().Be(element.Id);
     }
 
@@ -165,7 +164,7 @@ public class ReelRepositoryTests : IDisposable
 
         result.Should().HaveCount(2);
         result.Select(e => e.Id).Should().BeEquivalentTo(elements.Select(e => e.Id));
-        result.Select(e => ((PlainText)e).Text).Should().BeEquivalentTo(elements.Select(e => ((PlainText)e).Text));
+        result.Select(e => e.Data).Should().BeEquivalentTo(elements.Select(e => e.Data));
     }
 
     [Fact]
@@ -203,15 +202,14 @@ public class ReelRepositoryTests : IDisposable
         reel.ReelElements = new List<ReelElement> { element };
         await _collection.InsertOneAsync(reel);
 
-        element.Text = "Updated Text";
+        element.Data = "Updated Text";
         var result = await _repository.UpdateReelElementAsync(reel.Id, element);
 
         result.Should().NotBeNull();
-        result.Should().BeOfType<PlainText>();
-        ((PlainText)result).Text.Should().Be("Updated Text");
+        result.Data.Should().Be("Updated Text");
 
         var updatedReel = await _collection.Find(r => r.Id == reel.Id).FirstOrDefaultAsync();
-        ((PlainText)updatedReel!.ReelElements.First(e => e.Id == element.Id)).Text.Should().Be("Updated Text");
+        updatedReel!.ReelElements.First(e => e.Id == element.Id).Data.Should().Be("Updated Text");
     }
 
     [Fact]
@@ -309,12 +307,12 @@ public class ReelRepositoryTests : IDisposable
         result.Should().BeNull();
     }
 
-    private PlainText CreateTestReelElement()
+    private ReelElement CreateTestReelElement()
     {
-        return new PlainText
+        return new ReelElement
         {
             Id = Guid.NewGuid(),
-            Text = "Test Text"
+            Data = "Test Text"
         };
     }
 

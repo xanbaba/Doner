@@ -1,5 +1,4 @@
 ﻿using Doner.Features.ReelsFeature;
-using Doner.Features.ReelsFeature.Elements;
 using Doner.Features.ReelsFeature.Repository;
 using Doner.Features.ReelsFeature.Services;
 using Doner.Features.WorkspaceFeature.Entities;
@@ -29,11 +28,7 @@ public class ReelServiceTests
             v => v.RuleFor(r => r.WorkspaceId).NotEmpty()
         };
 
-        IValidator<ReelElement> reelElementValidator = new InlineValidator<ReelElement>
-        {
-            v => v.RuleFor(r => r.Id).NotEmpty()
-        };
-        _reelService = new ReelService(_reelRepositoryMock.Object, reelValidator, reelElementValidator,
+        _reelService = new ReelService(_reelRepositoryMock.Object, reelValidator,
             _workspaceServiceMock.Object);
     }
 

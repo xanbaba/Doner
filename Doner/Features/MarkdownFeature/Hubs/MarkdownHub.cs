@@ -25,9 +25,6 @@ public class MarkdownHub : Hub
 
     // Default timeout values
     private static readonly TimeSpan OperationLockTimeout = TimeSpan.FromSeconds(30);
-    private static readonly TimeSpan JoinLockTimeout = TimeSpan.FromSeconds(10);
-    private static readonly TimeSpan SyncLockTimeout = TimeSpan.FromSeconds(15);
-    private static readonly TimeSpan LeaveLockTimeout = TimeSpan.FromSeconds(5);
 
     public MarkdownHub(
         IConnectionTracker connectionTracker,

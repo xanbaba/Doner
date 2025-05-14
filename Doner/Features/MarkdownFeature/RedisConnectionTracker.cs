@@ -37,9 +37,7 @@ public class RedisConnectionTracker : IConnectionTracker
         var userInfo = new UserInfo
         {
             UserId = user.Id,
-            DisplayName = string.IsNullOrEmpty(user.LastName) 
-                ? user.FirstName 
-                : $"{user.FirstName} {user.LastName}",
+            DisplayName = user.Username,
             Email = user.Email,
             ConnectedAt = DateTime.UtcNow
         };

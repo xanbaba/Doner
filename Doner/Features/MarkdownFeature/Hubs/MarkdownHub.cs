@@ -125,7 +125,7 @@ public class MarkdownHub : Hub
             var userInfo = new UserInfo
             {
                 UserId = userId,
-                DisplayName = user.FirstName,
+                DisplayName = user.Username,
                 Email = user.Email,
                 ConnectedAt = DateTime.UtcNow
             };

@@ -8,6 +8,25 @@
       ACCEPT_EULA: "Y"
     volumes:
       - mssql-data:/var/opt/mssql
+      
+  redis:
+    image: redis:7.4.2-alpine
+    ports:
+      - "6379:6379"
+    command: >
+      redis-server
+      --appendonly yes
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
     env_file:
       - .env
   
@@ -27,4 +46,5 @@
 
 volumes:
   mssql-data:
+  redis-data:
   mongo-data:

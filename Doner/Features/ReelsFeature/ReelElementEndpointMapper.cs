@@ -27,7 +27,7 @@ public class ReelElementEndpointMapper : IEndpointMapper
     (
         [FromRoute] Guid reelId,
         [FromServices] IReelService reelService,
-        [FromServices] ClaimsPrincipal user,
+        ClaimsPrincipal user,
         CancellationToken cancellationToken
     )
     {
@@ -48,7 +48,7 @@ public class ReelElementEndpointMapper : IEndpointMapper
         [FromRoute] Guid reelId,
         [FromRoute] Guid elementId,
         [FromServices] IReelService reelService,
-        [FromServices] ClaimsPrincipal user,
+        ClaimsPrincipal user,
         CancellationToken cancellationToken
     )
     {
@@ -74,7 +74,7 @@ public class ReelElementEndpointMapper : IEndpointMapper
         [FromRoute] Guid reelId,
         [FromBody] AddReelElementRequest request,
         [FromServices] IReelService reelService,
-        [FromServices] ClaimsPrincipal user,
+        ClaimsPrincipal user,
         CancellationToken cancellationToken
     )
     {
@@ -122,7 +122,7 @@ public class ReelElementEndpointMapper : IEndpointMapper
         [FromRoute] Guid elementId,
         [FromBody] UpdateReelElementRequest request,
         [FromServices] IReelService reelService,
-        [FromServices] ClaimsPrincipal user,
+        ClaimsPrincipal user,
         CancellationToken cancellationToken
     )
     {
@@ -149,7 +149,7 @@ public class ReelElementEndpointMapper : IEndpointMapper
         [FromRoute] Guid reelId,
         [FromRoute] Guid elementId,
         [FromServices] IReelService reelService,
-        [FromServices] ClaimsPrincipal user,
+        ClaimsPrincipal user,
         CancellationToken cancellationToken
     )
     {

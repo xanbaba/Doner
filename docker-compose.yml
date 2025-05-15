@@ -4,7 +4,7 @@
     ports:
       - "1433:1433"
     environment:
-      SA_PASSWORD: "${DB_PASSWORD}"
+      SA_PASSWORD: "@!92427c7dec6c4214a2c7b76df60898c2!@"
       ACCEPT_EULA: "Y"
     volumes:
       - mssql-data:/var/opt/mssql
@@ -41,7 +41,7 @@
       - mongo-data:/data/db
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: "${MONGO_PASSWORD}"
+      MONGO_INITDB_ROOT_PASSWORD: "04de2619c36f4c1dae36c7407dea448e"
     restart: unless-stopped
 
 volumes:

@@ -9,7 +9,7 @@ using LanguageExt.Common;
 
 namespace Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 
-public class WorkspaceService(IWorkspaceRepository workspaceRepository, IInviteTokenService inviteTokenService, IEmailService emailService, AppDbContext dbContext): IWorkspaceService
+public class WorkspaceService(IWorkspaceRepository workspaceRepository, IInviteTokenService inviteTokenService, IEmailService emailService, AppDbContext dbContext, IHttpContextAccessor httpContextAccessor): IWorkspaceService
 {
     public async Task<Result<IEnumerable<Workspace>>> GetByOwnerAsync(Guid ownerId)
     {
@@ -137,7 +137,10 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository, IInviteT
         }
         
         var token = inviteTokenService.GenerateToken(workspace.Id, userToInvite.Id);
-        var link = $"https://localhost:3000/api/v1/users/me/workspaces/accept/{token}";
+        
+        var request = httpContextAccessor.HttpContext?.Request;
+        var baseUrl = $"{request?.Scheme}://{request?.Host}";
+        var link = $"{baseUrl}/api/v1/users/me/workspaces/accept/{token}";
         
         await emailService.SendEmailInviteAsync(email, userToInvite.Username, link);
         

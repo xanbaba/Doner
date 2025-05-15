@@ -14,6 +14,7 @@ public class WorkspaceFeature: IFeature
         builder.Services.AddScoped<IEmailService, EmailService>();
         builder.Services.AddScoped<IInviteTokenService, InviteTokenService>();
         builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("Smtp"));
+        builder.Services.AddHttpContextAccessor();
     }
 
     public static void Configure(WebApplication app)

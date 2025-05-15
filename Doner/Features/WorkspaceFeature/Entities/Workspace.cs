@@ -9,6 +9,7 @@ public class Workspace
     public string Name { get; set; } = null!;
     public string? Description { get; set; }
     
+    public string? Styles { get; set; }
     public Guid OwnerId { get; set; }
     public User Owner { get; set; } = null!;
     

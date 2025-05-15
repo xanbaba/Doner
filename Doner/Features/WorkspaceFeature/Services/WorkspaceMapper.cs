@@ -13,6 +13,7 @@ public static class WorkspaceMapper
             Name = workspace.Name,
             Description = workspace.Description,
             OwnerId = workspace.OwnerId,
+            Styles = workspace.Styles,
             CreatedAtUtc = workspace.CreatedAtUtc
         };
 
@@ -28,6 +29,7 @@ public static class WorkspaceMapper
             Id = Guid.CreateVersion7(),
             Name = request.Name,
             Description = request.Description,
+            Styles = request.Styles,
             OwnerId = ownerId
         };
     
@@ -37,6 +39,7 @@ public static class WorkspaceMapper
             Id = workspaceId,
             Name = request.Name,
             Description = request.Description,
+            Styles = request.Styles,
             OwnerId = ownerId
         };
 }

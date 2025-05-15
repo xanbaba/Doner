@@ -16,6 +16,9 @@ public class WorkspaceConfiguration: IEntityTypeConfiguration<Workspace>
         builder.Property(c => c.Description)
             .HasMaxLength(500);
 
+        builder.Property(c => c.Styles)
+            .HasMaxLength(500);
+
         builder.HasOne(e => e.Owner)
             .WithMany()
             .HasForeignKey(e => e.OwnerId)

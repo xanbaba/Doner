@@ -35,6 +35,7 @@ public abstract class WorkspaceEndpointMapper : IEndpointMapper
         workspacesGroup.MapPut("/{id:guid}", UpdateWorkspace);
         workspacesGroup.MapDelete("/{id:guid}", RemoveWorkspace);
         workspacesGroup.MapPost("/{id:guid}/invite", InviteUser);
+        workspacesGroup.MapPost("/accept/{token}", AcceptInvite);
     }
 
 
@@ -159,7 +160,7 @@ public abstract class WorkspaceEndpointMapper : IEndpointMapper
         );
     }
 
-    private static async Task<Results<NoContent, BadRequest<string>, NotFound<string>>> AcceptInviteAsync(
+    private static async Task<Results<NoContent, BadRequest<string>, NotFound<string>>> AcceptInvite(
         [FromServices] IWorkspaceService workspaceService,
         [FromRoute] string token,
         ClaimsPrincipal user

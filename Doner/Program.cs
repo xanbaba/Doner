@@ -34,8 +34,8 @@ public class Program
         if (!app.Environment.IsEnvironment("Testing"))
         {
             app.MigrateDatabase<AppDbContext>();
-            // app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureDeleted();
-            // app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
+            //app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureDeleted();
+            app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
         }
 
         // Configure the HTTP request pipeline.

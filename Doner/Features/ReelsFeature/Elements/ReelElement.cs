@@ -3,10 +3,11 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Doner.Features.ReelsFeature.Elements;
 
-[BsonDiscriminator(Required = true, RootClass = true)]
-public abstract class ReelElement
+public class ReelElement
 {
     [BsonId]
     [BsonGuidRepresentation(GuidRepresentation.Standard)]
     public Guid Id { get; set; }
+    
+    public string? Data { get; set; }
 }

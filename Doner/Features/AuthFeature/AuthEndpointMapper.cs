@@ -43,9 +43,7 @@ public abstract class AuthEndpointMapper : IEndpointMapper
         var user = new User
         {
             Id = Guid.CreateVersion7(),
-            FirstName = request.FirstName,
-            MiddleName = request.MiddleName,
-            LastName = request.LastName,
+            Username = request.Username,
             Email = request.Email,
             Login = request.Login,
             PasswordSalt = salt,

@@ -1,4 +1,3 @@
-using Doner.Features.AuthFeature.Entities;
 using Doner.Features.WorkspaceFeature.Entities;
 
 namespace Doner.Features.WorkspaceFeature.Repository;
@@ -15,7 +14,10 @@ public interface IWorkspaceRepository
     
     Task RemoveAsync(Guid id);
     Task RemoveAsync(Workspace workspace);
+
     Task<bool> Exists(Guid workspaceId);
     
     Task<bool> Exists(Guid ownerId, string workspaceName);
+    Task<bool> IsUserInWorkspaceAsync(Guid workspaceId, Guid userId);
+
 }

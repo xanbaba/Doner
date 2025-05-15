@@ -12,20 +12,17 @@ public class ReelService : IReelService
 {
     private readonly IReelRepository _reelRepository;
     private readonly IValidator<Reel> _reelValidator;
-    private readonly IValidator<ReelElement> _reelElementValidator;
     private readonly IWorkspaceService _workspaceService;
 
     public ReelService
     (
         IReelRepository reelRepository,
         IValidator<Reel> reelValidator,
-        IValidator<ReelElement> reelElementValidator,
         IWorkspaceService workspaceService
     )
     {
         _reelRepository = reelRepository;
         _reelValidator = reelValidator;
-        _reelElementValidator = reelElementValidator;
         _workspaceService = workspaceService;
     }
 
@@ -160,7 +157,6 @@ public class ReelService : IReelService
         {
             throw new UnauthorizedAccessException();
         }
-        await _reelElementValidator.ValidateAndThrowAsync(reelElement, cancellationToken);
         return await _reelRepository.AppendReelElementAsync(reelId, reelElement, cancellationToken);
     }
 
@@ -176,7 +172,6 @@ public class ReelService : IReelService
         {
             throw new UnauthorizedAccessException();
         }
-        await _reelElementValidator.ValidateAndThrowAsync(reelElement, cancellationToken);
         return await _reelRepository.PrependReelElementAsync(reelId, reelElement, cancellationToken);
     }
 
@@ -192,7 +187,6 @@ public class ReelService : IReelService
         {
             throw new UnauthorizedAccessException();
         }
-        await _reelElementValidator.ValidateAndThrowAsync(reelElement, cancellationToken);
         return await _reelRepository.InsertReelElementAsync(reelId, insertAfterElementId, reelElement, cancellationToken);
     }
 
@@ -208,7 +202,6 @@ public class ReelService : IReelService
         {
             throw new UnauthorizedAccessException();
         }
-        await _reelElementValidator.ValidateAndThrowAsync(reelElement, cancellationToken);
         return await _reelRepository.UpdateReelElementAsync(reelId, reelElement, cancellationToken);
     }
 

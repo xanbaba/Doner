@@ -11,6 +11,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Mongo2Go;
 using MongoDB.Driver;
+using Moq;
+using StackExchange.Redis;
 
 namespace Doner.Tests;
 
@@ -44,6 +46,13 @@ public class ReelEndpointTests : IClassFixture<WebApplicationFactory<Program>>, 
                 {
                     services.Remove(descriptorMongo);
                 }
+                
+                var redisDescriptor = services.SingleOrDefault(s => s.ServiceType == typeof(IConnectionMultiplexer));
+                if (redisDescriptor != null)
+                {
+                    services.Remove(redisDescriptor);
+                }
+                services.AddSingleton(new Mock<IConnectionMultiplexer>().Object);
 
                 services.AddDbContextFactory<AppDbContext>(optionsBuilder =>
                     optionsBuilder.UseInMemoryDatabase(Guid.NewGuid().ToString()));
@@ -61,8 +70,7 @@ public class ReelEndpointTests : IClassFixture<WebApplicationFactory<Program>>, 
     {
         var signUpRequest = new SignUpRequest
         {
-            FirstName = "Test",
-            LastName = "User",
+            Username = "testuser",
             Login = "testuser",
             Password = "Password123!"
         };

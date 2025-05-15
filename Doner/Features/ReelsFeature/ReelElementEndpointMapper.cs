@@ -129,7 +129,7 @@ public class ReelElementEndpointMapper : IEndpointMapper
         try
         {
             ReelElement? result =
-                await reelService.UpdateReelElementAsync(reelId, request.ToReelElement(), user.GetUserId(),
+                await reelService.UpdateReelElementAsync(reelId, request.ToReelElement(elementId), user.GetUserId(),
                     cancellationToken);
             if (result is null)
             {

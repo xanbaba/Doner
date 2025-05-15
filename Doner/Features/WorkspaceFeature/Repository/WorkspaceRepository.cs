@@ -44,6 +44,7 @@ public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactor
 
         entity.Name = workspace.Name;
         entity.Description = workspace.Description;
+        entity.Styles = workspace.Styles;
         
         await context.SaveChangesAsync();
     }

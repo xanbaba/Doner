@@ -2,6 +2,7 @@ using Doner.Features.MarkdownFeature.Hubs;
 using Doner.Features.MarkdownFeature.Locking;
 using Doner.Features.MarkdownFeature.OT;
 using Doner.Features.MarkdownFeature.Repositories;
+using Doner.Features.MarkdownFeature.Services;
 using MongoDB.Driver;
 using StackExchange.Redis;
 
@@ -49,10 +50,14 @@ public class MarkdownFeature : IFeature
         });
         
         builder.Services.AddScoped<IConnectionTracker, RedisConnectionTracker>();
+        
+        // Register Markdown Services
+        builder.Services.AddScoped<IMarkdownService, MarkdownService>();
     }
 
     public static void Configure(WebApplication app)
     {
         app.MapHub<MarkdownHub>("/hubs/markdown");
+        app.MapGroup("/api/v1").MapEndpoints<MarkdownEndpointMapper>();
     }
 }

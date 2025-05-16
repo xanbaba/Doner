@@ -1,6 +1,5 @@
 ﻿using Doner.Features.ReelsFeature.Elements;
 using Doner.Features.ReelsFeature.Repository;
-using Doner.Features.WorkspaceFeature.Exceptions;
 using Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 using FluentValidation;
 using LanguageExt;

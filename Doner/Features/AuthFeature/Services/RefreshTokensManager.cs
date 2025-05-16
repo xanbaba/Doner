@@ -7,7 +7,6 @@ namespace Doner.Features.AuthFeature.Services;
 
 public class RefreshTokensManager(AppDbContext dbContext, IConfiguration configuration) : IRefreshTokensManager
 {
-    // TODO
     private readonly int _refreshTokenLifetimeDays = configuration.GetValue<int>("RefreshTokenLifetimeDays");
     
     public async Task<Result<string>> RefreshTokenAsync(string refreshToken)

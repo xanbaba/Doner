@@ -3,7 +3,6 @@ using Doner.Features.AuthFeature;
 using Doner.Features.MarkdownFeature;
 using Doner.Features.ReelsFeature;
 using Doner.Features.WorkspaceFeature;
-using Doner.Features.WorkspaceFeature.Services.EmailService;
 using DotNetEnv;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
@@ -56,9 +55,7 @@ public class Program
 
         if (!app.Environment.IsEnvironment("Testing"))
         {
-            //app.MigrateDatabase<AppDbContext>();
-            app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureDeleted();
-            app.Services.CreateScope().ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureCreated();
+            app.MigrateDatabase<AppDbContext>();
         }
 
         // Configure the HTTP request pipeline.

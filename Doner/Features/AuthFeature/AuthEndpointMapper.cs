@@ -35,7 +35,7 @@ public abstract class AuthEndpointMapper : IEndpointMapper
             return TypedResults.BadRequest("This login is already taken");
         }
 
-        if (request.Email is not null && dbContext.Users.Any(u => u.Email == request.Email))
+        if (dbContext.Users.Any(u => u.Email == request.Email))
         {
             return TypedResults.BadRequest("This email is already taken");
         }

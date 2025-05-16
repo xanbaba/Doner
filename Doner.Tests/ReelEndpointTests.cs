@@ -72,7 +72,8 @@ public class ReelEndpointTests : IClassFixture<WebApplicationFactory<Program>>, 
         {
             Username = "testuser",
             Login = "testuser",
-            Password = "Password123!"
+            Password = "Password123!",
+            Email = "test@gmail.com"
         };
 
         var signInRequest = new SignInRequest
@@ -109,14 +110,15 @@ public class ReelEndpointTests : IClassFixture<WebApplicationFactory<Program>>, 
         addWorkspaceResponse.EnsureSuccessStatusCode();
         var addedWorkspace = await addWorkspaceResponse.Content.ReadFromJsonAsync<WorkspaceResponse>();
         Assert.NotNull(addedWorkspace);
-        
+
         // Add a reel
         var addRequest = new AddReelRequest { Name = "Test Reel", Description = "Test Description" };
-        var addReelResponse = await _httpClient.PostAsJsonAsync($"users/me/workspaces/{addedWorkspace.Id}/reels", addRequest);
+        var addReelResponse =
+            await _httpClient.PostAsJsonAsync($"users/me/workspaces/{addedWorkspace.Id}/reels", addRequest);
         addReelResponse.EnsureSuccessStatusCode();
         var addedReel = await addReelResponse.Content.ReadFromJsonAsync<ReelResponse>();
         Assert.NotNull(addedReel);
-        
+
         // Get reels of workspace
         var response = await _httpClient.GetAsync($"users/me/workspaces/{addedWorkspace.Id}/reels");
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -392,7 +394,7 @@ public class ReelEndpointTests : IClassFixture<WebApplicationFactory<Program>>, 
 
         var reels = await getResponse.Content.ReadFromJsonAsync<ReelsResponse>();
         Assert.NotNull(reels);
-        
+
         Assert.NotNull(reels.Items);
         Assert.NotEmpty(reels.Items);
         Assert.NotEmpty(reels.Items);

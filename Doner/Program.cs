@@ -26,11 +26,14 @@ public class Program
         {
             options.AddDefaultPolicy(policy =>
             {
-                policy.AllowAnyOrigin()
+                policy
+                    .WithOrigins("http://localhost:5173") // Must be exact, no slash
+                    .AllowCredentials()
                     .AllowAnyMethod()
                     .AllowAnyHeader();
             });
         });
+
 
         builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
         builder.Services.AddSwaggerGen();

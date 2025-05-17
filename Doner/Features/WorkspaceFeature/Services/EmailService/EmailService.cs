@@ -1,52 +1,58 @@
 ﻿using System.Net;
 using System.Net.Mail;
+using Mailjet.Client;
+using Mailjet.Client.Resources;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
 
 namespace Doner.Features.WorkspaceFeature.Services.EmailService;
 
-public class SmtpSettings
+public class MailjetSettings
 {
-    public string Host { get; set; } = string.Empty;
-    public int Port { get; set; }
-    public string Username { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
+    public string ApiKey { get; set; } = string.Empty;
+    public string ApiSecret { get; set; } = string.Empty;
     public string FromEmail { get; set; } = string.Empty;
     public string FromName { get; set; } = string.Empty;
 }
 
-public class EmailService(IOptions<SmtpSettings> config) : IEmailService
+public class EmailService(IOptions<MailjetSettings> config) : IEmailService
 {
-    private readonly SmtpSettings _settings = config.Value;
+    private readonly MailjetSettings _settings = config.Value;
 
     public async Task SendEmailInviteAsync(string toEmail, string username, string link)
     {
-        var subject = "You're invited to join a workspace";
-        var plainTextContent = $"Dear {username},\n\nYou've been invited to join a workspace.\nPlease click the link below to accept the invitation:\n{link}\n\nBest regards,\nYour Team";
-        var htmlContent = $"<p>Dear {username},</p><p>You've been invited to join a workspace.</p><p><a href='{link}'>Click here to accept</a></p><br><p>Best regards,<br>Your Team</p>";
+        var client = new MailjetClient(_settings.ApiKey, _settings.ApiSecret);
 
-        var mailMessage = new MailMessage
-        {
-            From = new MailAddress(_settings.FromEmail, _settings.FromName),
-            Subject = subject,
-            Body = htmlContent,
-            IsBodyHtml = true
-        };
+        var request = new MailjetRequest
+            {
+                Resource = SendV31.Resource,
+            }
+            .Property(Send.Messages, new JArray {
+                new JObject {
+                    {
+                        "From", new JObject {
+                            { "Email", _settings.FromEmail },
+                            { "Name", _settings.FromName }
+                        }
+                    },
+                    {
+                        "To", new JArray {
+                            new JObject {
+                                { "Email", toEmail },
+                                { "Name", username }
+                            }
+                        }
+                    },
+                    { "Subject", "You're invited to join a workspace" },
+                    { "TextPart", $"Dear {username},\n\nYou've been invited to join a workspace.\n{link}" },
+                    { "HTMLPart", $"<p>Dear {username},</p><p>You've been invited to join a workspace.</p><p><a href='{link}'>Click here to accept</a></p>" }
+                }
+            });
 
-        mailMessage.To.Add(new MailAddress(toEmail, username));
-
-        using var smtp = new SmtpClient(_settings.Host, _settings.Port)
+        var response = await client.PostAsync(request);
+        if (!response.IsSuccessStatusCode)
         {
-            Credentials = new NetworkCredential(_settings.Username, _settings.Password),
-            EnableSsl = true
-        };
-
-        try
-        {
-            await smtp.SendMailAsync(mailMessage);
-        }
-        catch (Exception ex)
-        {
-            throw new Exception("Failed to send email via SMTP", ex);
+            throw new Exception($"Mailjet failed: {response.StatusCode} - {response.GetErrorMessage()}");
         }
     }
 }

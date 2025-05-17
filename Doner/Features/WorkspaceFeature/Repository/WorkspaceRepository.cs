@@ -6,12 +6,12 @@ namespace Doner.Features.WorkspaceFeature.Repository;
 
 public class WorkspaceRepository(IDbContextFactory<AppDbContext> dbContextFactory): IWorkspaceRepository
 {
-    public async Task<IEnumerable<Workspace>> GetByOwnerAsync(Guid ownerId)
+    public async Task<IEnumerable<Workspace>> GetWorkspaces(Guid userId)
     {
         await using var context = await dbContextFactory.CreateDbContextAsync();
         
         return context.Workspaces
-            .Where(w => w.OwnerId == ownerId).OrderBy(x => x.CreatedAtUtc).ToArray();
+            .Where(w => w.OwnerId == userId || w.Invitees.Any(i => i.UserId == userId)).OrderBy(x => x.CreatedAtUtc).ToArray();
     }
 
     public async Task<Workspace?> GetAsync(Guid id)

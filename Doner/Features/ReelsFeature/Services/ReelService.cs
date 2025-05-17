@@ -1,5 +1,6 @@
 ﻿using Doner.Features.ReelsFeature.Elements;
 using Doner.Features.ReelsFeature.Repository;
+using Doner.Features.WorkspaceFeature.Repository;
 using Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 using FluentValidation;
 using LanguageExt;
@@ -10,17 +11,20 @@ namespace Doner.Features.ReelsFeature.Services;
 public class ReelService : IReelService
 {
     private readonly IReelRepository _reelRepository;
+    private readonly IWorkspaceRepository _workspaceRepository;
     private readonly IValidator<Reel> _reelValidator;
     private readonly IWorkspaceService _workspaceService;
 
     public ReelService
     (
         IReelRepository reelRepository,
+        IWorkspaceRepository workspaceRepository,
         IValidator<Reel> reelValidator,
         IWorkspaceService workspaceService
     )
     {
         _reelRepository = reelRepository;
+        _workspaceRepository = workspaceRepository;
         _reelValidator = reelValidator;
         _workspaceService = workspaceService;
     }

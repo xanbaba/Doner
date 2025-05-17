@@ -20,16 +20,16 @@ public class WorkspaceRepositoryTests : IDisposable
     [Fact]
     public async Task GetByOwnerAsync_ShouldReturnWorkspaces_WhenOwnerExists()
     {
-        var ownerId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
         var workspaces = new List<Workspace>
         {
-            new() { Id = Guid.NewGuid(), Name = "Workspace 1", OwnerId = ownerId },
-            new() { Id = Guid.NewGuid(), Name = "Workspace 2", OwnerId = ownerId }
+            new() { Id = Guid.NewGuid(), Name = "Workspace 1", OwnerId = userId },
+            new() { Id = Guid.NewGuid(), Name = "Workspace 2", OwnerId = userId }
         };
         await _dbContext.Workspaces.AddRangeAsync(workspaces);
         await _dbContext.SaveChangesAsync();
 
-        var result = (await _repository.GetByOwnerAsync(ownerId)).ToList();
+        var result = (await _repository.GetWorkspaces(userId)).ToList();
         _dbContext.ChangeTracker.Clear();
 
         result.Should().HaveCount(2);
@@ -48,7 +48,7 @@ public class WorkspaceRepositoryTests : IDisposable
         await _dbContext.Workspaces.AddRangeAsync(workspaces);
         await _dbContext.SaveChangesAsync();
         
-        var result = (await _repository.GetByOwnerAsync(Guid.NewGuid())).ToList();
+        var result = (await _repository.GetWorkspaces(Guid.NewGuid())).ToList();
         _dbContext.ChangeTracker.Clear();
 
         result.Should().BeEmpty();

@@ -24,15 +24,15 @@ public class WorkspaceServiceTests
     [Fact]
     public async Task GetByOwnerAsync_ShouldReturnWorkspaces_WhenOwnerExists()
     {
-        var ownerId = Guid.NewGuid();
+        var userId = Guid.NewGuid();
         var workspaces = new List<Workspace>
         {
-            new Workspace { Id = Guid.NewGuid(), Name = "Workspace 1", OwnerId = ownerId },
-            new Workspace { Id = Guid.NewGuid(), Name = "Workspace 2", OwnerId = ownerId }
+            new Workspace { Id = Guid.NewGuid(), Name = "Workspace 1", OwnerId = userId },
+            new Workspace { Id = Guid.NewGuid(), Name = "Workspace 2", OwnerId = userId }
         };
-        _workspaceRepositoryMock.Setup(r => r.GetByOwnerAsync(ownerId)).ReturnsAsync(workspaces);
+        _workspaceRepositoryMock.Setup(r => r.GetWorkspaces(userId)).ReturnsAsync(workspaces);
 
-        var result = await _workspaceService.GetByOwnerAsync(ownerId);
+        var result = await _workspaceService.GetByOwnerAsync(userId);
 
         result.IsSuccess.Should().BeTrue();
         result.IfSucc(value => value.Should().BeEquivalentTo(workspaces));

@@ -11,9 +11,9 @@ namespace Doner.Features.WorkspaceFeature.Services.WorkspaceService;
 
 public class WorkspaceService(IWorkspaceRepository workspaceRepository, IInviteTokenService inviteTokenService, IEmailService emailService, AppDbContext dbContext, IHttpContextAccessor httpContextAccessor): IWorkspaceService
 {
-    public async Task<Result<IEnumerable<Workspace>>> GetByOwnerAsync(Guid ownerId)
+    public async Task<Result<IEnumerable<Workspace>>> GetByOwnerAsync(Guid userId)
     {
-        var workspaces = await workspaceRepository.GetByOwnerAsync(ownerId);
+        var workspaces = await workspaceRepository.GetWorkspaces(userId);
         
         return new Result<IEnumerable<Workspace>>(workspaces);
     }
@@ -27,7 +27,7 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository, IInviteT
             return new Result<Workspace>(new WorkspaceNotFoundException());
         }
 
-        if (workspace.OwnerId != userId)
+        if (!await workspaceRepository.IsUserInWorkspaceAsync(workspace.Id, userId))
         {
             return new Result<Workspace>(new PermissionDeniedException());
         }
@@ -121,9 +121,10 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository, IInviteT
         {
             return new Result<Unit>(new PermissionDeniedException());
         }
-        
-        var inviteAlreadyExists = workspace.Invitees.Any(wi => wi.User.Email == email && wi.WorkspaceId == workspaceId);
 
+        var invitees = dbContext.WorkspaceInvites.Where(wi => wi.WorkspaceId == workspace.Id);
+        var inviteAlreadyExists = invitees.Any(wi => wi.User.Email == email && wi.WorkspaceId == workspaceId);
+        
         if (inviteAlreadyExists)
         {
             return new Result<Unit>(new WorkspaceInviteAlreadyExistsException());
@@ -147,7 +148,7 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository, IInviteT
         return Unit.Default;
     }
 
-    public async Task<Result<Unit>> AcceptInviteAsync(Guid userId, string token)
+    public async Task<Result<Unit>> AcceptInviteAsync(string token)
     {
         var decrypted = inviteTokenService.DecryptToken(token);
 
@@ -156,18 +157,21 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository, IInviteT
             return new Result<Unit>(new InvalidInviteTokenException());
         }
 
-        var (invitedUserId, workspaceId) = decrypted.Value;
-
-        if (invitedUserId != userId)
-        {
-            return new Result<Unit>(new UnableToAcceptInviteException());
-        }
+        var (workspaceId, invitedUserId) = decrypted.Value;
         
         var workspace = await workspaceRepository.GetAsync(workspaceId);
 
         if (workspace is null)
         {
             return new Result<Unit>(new WorkspaceNotFoundException());
+        }
+        
+        var invitees = dbContext.WorkspaceInvites.Where(wi => wi.WorkspaceId == workspace.Id);
+        var inviteAlreadyAccepted = invitees.Any(wi => wi.UserId == invitedUserId && wi.WorkspaceId == workspaceId);
+        
+        if (inviteAlreadyAccepted)
+        {
+            return new Result<Unit>(new InviteAlreadyAcceptedException());
         }
 
         dbContext.WorkspaceInvites.Add(new WorkspaceInvite()

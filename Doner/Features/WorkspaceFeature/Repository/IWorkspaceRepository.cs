@@ -4,7 +4,7 @@ namespace Doner.Features.WorkspaceFeature.Repository;
 
 public interface IWorkspaceRepository
 {
-    Task<IEnumerable<Workspace>> GetByOwnerAsync(Guid ownerId);
+    Task<IEnumerable<Workspace>> GetWorkspaces(Guid userId);
     Task<Workspace?> GetAsync(Guid id);
 
     Task<Guid> AddAsync(Workspace workspace);

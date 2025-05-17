@@ -24,6 +24,7 @@ public abstract class WorkspaceEndpointMapper : IEndpointMapper
     private const string UserNotFound = "User is not found.";
     private const string InvalidInviteToken = "Invite token is invalid.";
     private const string UnableToAcceptInvite = "Unable to accept invite.";
+    private const string InviteAlreadyAccepted = "This invite is already accepted.";
 
     public static void Map(IEndpointRouteBuilder builder)
     {
@@ -35,7 +36,7 @@ public abstract class WorkspaceEndpointMapper : IEndpointMapper
         workspacesGroup.MapPut("/{id:guid}", UpdateWorkspace);
         workspacesGroup.MapDelete("/{id:guid}", RemoveWorkspace);
         workspacesGroup.MapPost("/{id:guid}/invite", InviteUser);
-        workspacesGroup.MapPost("/accept/{token}", AcceptInvite);
+        workspacesGroup.MapGet("/accept/{token}", AcceptInvite).AllowAnonymous();
     }
 
 
@@ -54,7 +55,7 @@ public abstract class WorkspaceEndpointMapper : IEndpointMapper
     private static async Task<Results<NotFound<string>, Ok<WorkspaceResponse>>> GetWorkspace(
         [FromServices] IWorkspaceService workspaceService,
         [FromRoute] Guid id,
-        [FromServices] ClaimsPrincipal user
+        ClaimsPrincipal user
     )
     {
         var workspaceResult = await workspaceService.GetAsync(id, user.GetUserId());
@@ -166,7 +167,7 @@ public abstract class WorkspaceEndpointMapper : IEndpointMapper
         ClaimsPrincipal user
     )
     {
-        var result = await workspaceService.AcceptInviteAsync(user.GetUserId(), token);
+        var result = await workspaceService.AcceptInviteAsync(token);
 
         return result.Match<Results<NoContent, BadRequest<string>, NotFound<string>>>(
             _ => TypedResults.NoContent(),
@@ -174,6 +175,7 @@ public abstract class WorkspaceEndpointMapper : IEndpointMapper
             {
                 InvalidInviteTokenException => TypedResults.BadRequest(InvalidInviteToken),
                 UnableToAcceptInviteException => TypedResults.BadRequest(UnableToAcceptInvite),
+                InviteAlreadyAcceptedException => TypedResults.BadRequest(InviteAlreadyAccepted),
                 WorkspaceNotFoundException => TypedResults.NotFound(WorkspaceNotFound),
                 _ => throw exception
             });

@@ -21,13 +21,11 @@ public class Program
 
         builder.Services.AddCors(options =>
         {
-            options.AddPolicy("CorsPolicy", x =>
+            options.AddDefaultPolicy(policy =>
             {
-                x
-                    .WithOrigins("http://127.0.0.1:5500") // Your client app's origin
+                policy.AllowAnyOrigin()
                     .AllowAnyMethod()
-                    .AllowAnyHeader()
-                    .AllowCredentials(); // Important for SignalR connections
+                    .AllowAnyHeader();
             });
         });
 
@@ -64,9 +62,9 @@ public class Program
             app.MapOpenApi();
         }
 
-        app.UseHttpsRedirection();
-        app.UseCors("CorsPolicy");
         app.UseMiddleware<ExceptionHandlingMiddleware>();
+        app.UseHttpsRedirection();
+        app.UseCors();
         app.UseFeature<AuthFeature>();
         app.UseFeature<ReelsFeature>();
         app.UseFeature<WorkspaceFeature>();

@@ -86,11 +86,11 @@ public class MarkdownService : IMarkdownService
         await _validator.ValidateAndThrowAsync(markdown);
 
         // Create markdown
-        await _markdownRepository.CreateMarkdownAsync(title, userId, workspaceId);
+        var markdownId = await _markdownRepository.CreateMarkdownAsync(title, userId, workspaceId);
         
         // We don't have a way to get the created ID in this implementation
         // In a real application, the repository would return the ID
-        return "markdown-created";
+        return markdownId;
     }
 
     public async Task<Result<Unit>> UpdateMarkdownAsync(string markdownId, string title, Guid workspaceId, Guid userId)

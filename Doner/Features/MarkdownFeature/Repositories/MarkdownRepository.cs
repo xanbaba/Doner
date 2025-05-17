@@ -65,10 +65,11 @@ public class MarkdownRepository : IMarkdownRepository
         return markdowns;
     }
     
-    public async Task CreateMarkdownAsync(string title, Guid ownerId, Guid workspaceId, CancellationToken cancellationToken = default)
+    public async Task<string> CreateMarkdownAsync(string title, Guid ownerId, Guid workspaceId, CancellationToken cancellationToken = default)
     {
         var markdown = new Markdown
         {
+            Id = ObjectId.GenerateNewId().ToString(),
             OwnerId = ownerId,
             Title = title,
             CreatedAt = DateTime.UtcNow,
@@ -78,6 +79,8 @@ public class MarkdownRepository : IMarkdownRepository
         };
         
         await _markdownCollection.InsertOneAsync(markdown, null, cancellationToken);
+
+        return markdown.Id;
     }
     
     public async Task UpdateMarkdownAsync(string markdownId, string title, CancellationToken cancellationToken = default)
@@ -100,11 +103,6 @@ public class MarkdownRepository : IMarkdownRepository
         
         // Project only metadata fields, excluding content
         var projection = Builders<Markdown>.Projection
-            .Include(m => m.Id)
-            .Include(m => m.OwnerId)
-            .Include(m => m.Title)
-            .Include(m => m.CreatedAt)
-            .Include(m => m.Version)
             .Exclude(m => m.Content);
         
         var metadata = await _markdownCollection.Find(filter)

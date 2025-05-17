@@ -1,6 +1,6 @@
 namespace Contracts.V1.Requests;
 
-public abstract class AddReelElementRequest
+public class AddReelElementRequest
 {
     public required AddType AddType { get; set; }
     /// <summary>

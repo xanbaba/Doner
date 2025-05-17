@@ -11,17 +11,20 @@ namespace Doner.Features.ReelsFeature.Services;
 public class ReelService : IReelService
 {
     private readonly IReelRepository _reelRepository;
+    private readonly IWorkspaceRepository _workspaceRepository;
     private readonly IValidator<Reel> _reelValidator;
     private readonly IWorkspaceService _workspaceService;
 
     public ReelService
     (
         IReelRepository reelRepository,
+        IWorkspaceRepository workspaceRepository,
         IValidator<Reel> reelValidator,
         IWorkspaceService workspaceService
     )
     {
         _reelRepository = reelRepository;
+        _workspaceRepository = workspaceRepository;
         _reelValidator = reelValidator;
         _workspaceService = workspaceService;
     }
@@ -56,7 +59,7 @@ public class ReelService : IReelService
             return false;
         }
 
-        if (reel.OwnerId != existingReel.OwnerId)
+        if (!await _workspaceRepository.IsUserInWorkspaceAsync(reel.WorkspaceId, reel.OwnerId))
         {
             throw new UnauthorizedAccessException();
         }
@@ -77,7 +80,7 @@ public class ReelService : IReelService
             return false;
         }
 
-        if (reel.OwnerId != userId)
+        if (!await _workspaceRepository.IsUserInWorkspaceAsync(reel.WorkspaceId, userId))
         {
             throw new UnauthorizedAccessException();
         }
@@ -106,7 +109,15 @@ public class ReelService : IReelService
 
 
         var reels = await _reelRepository.GetByWorkspaceAsync(workspaceId, cancellationToken);
-        return reels.Where(reel => reel.OwnerId == userId);
+        var filteredReels = new List<Reel>();
+        foreach (var reel in reels)
+        {
+            if (await _workspaceRepository.IsUserInWorkspaceAsync(reel.WorkspaceId, userId))
+            {
+                filteredReels.Add(reel);
+            }
+        }
+        return filteredReels;
     }
 
     public Task<IEnumerable<Reel>> SearchByNameAsync(string name, SearchOption searchOption,
@@ -122,7 +133,7 @@ public class ReelService : IReelService
         {
             return null;
         }
-        if (reel.OwnerId != userId)
+        if (!await _workspaceRepository.IsUserInWorkspaceAsync(reel.WorkspaceId, userId))
         {
             throw new UnauthorizedAccessException();
         }
@@ -137,7 +148,7 @@ public class ReelService : IReelService
         {
             return [];
         }
-        if (reel.OwnerId != userId)
+        if (!await _workspaceRepository.IsUserInWorkspaceAsync(reel.WorkspaceId, userId))
         {
             throw new UnauthorizedAccessException();
         }
@@ -153,7 +164,7 @@ public class ReelService : IReelService
         {
             return null;
         }
-        if (reel.OwnerId != userId)
+        if (!await _workspaceRepository.IsUserInWorkspaceAsync(reel.WorkspaceId, userId))
         {
             throw new UnauthorizedAccessException();
         }
@@ -168,7 +179,7 @@ public class ReelService : IReelService
         {
             return null;
         }
-        if (reel.OwnerId != userId)
+        if (!await _workspaceRepository.IsUserInWorkspaceAsync(reel.WorkspaceId, userId))
         {
             throw new UnauthorizedAccessException();
         }
@@ -183,7 +194,7 @@ public class ReelService : IReelService
         {
             return null;
         }
-        if (reel.OwnerId != userId)
+        if (!await _workspaceRepository.IsUserInWorkspaceAsync(reel.WorkspaceId, userId))
         {
             throw new UnauthorizedAccessException();
         }
@@ -198,7 +209,7 @@ public class ReelService : IReelService
         {
             return null;
         }
-        if (reel.OwnerId != userId)
+        if (!await _workspaceRepository.IsUserInWorkspaceAsync(reel.WorkspaceId, userId))
         {
             throw new UnauthorizedAccessException();
         }
@@ -212,7 +223,7 @@ public class ReelService : IReelService
         {
             return false;
         }
-        if (reel.OwnerId != userId)
+        if (!await _workspaceRepository.IsUserInWorkspaceAsync(reel.WorkspaceId, userId))
         {
             throw new UnauthorizedAccessException();
         }

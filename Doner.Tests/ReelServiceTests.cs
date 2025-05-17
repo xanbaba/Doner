@@ -28,7 +28,7 @@ public class ReelServiceTests
             v => v.RuleFor(r => r.WorkspaceId).NotEmpty()
         };
 
-        _reelService = new ReelService(_reelRepositoryMock.Object, reelValidator,
+        _reelService = new ReelService(_reelRepositoryMock.Object, null!, reelValidator,
             _workspaceServiceMock.Object);
     }
 

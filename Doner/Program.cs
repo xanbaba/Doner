@@ -3,10 +3,13 @@ using Doner.Features.AuthFeature;
 using Doner.Features.MarkdownFeature;
 using Doner.Features.ReelsFeature;
 using Doner.Features.WorkspaceFeature;
+using Doner.Swagger;
 using DotNetEnv;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace Doner;
 
@@ -29,7 +32,9 @@ public class Program
             });
         });
 
-        
+        builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+        builder.Services.AddSwaggerGen();
+
         // Add services to the container.
         // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
         builder.Services.AddOpenApi();
@@ -60,6 +65,8 @@ public class Program
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
+            app.UseSwagger();
+            app.UseSwaggerUI();
         }
 
         app.UseMiddleware<ExceptionHandlingMiddleware>();

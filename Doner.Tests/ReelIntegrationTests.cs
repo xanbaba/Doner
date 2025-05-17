@@ -34,7 +34,7 @@ public class ReelIntegrationTests : IDisposable
         _appDbContextFactory = new AppDbContextFactory();
         var workspaceRepository = new WorkspaceRepository(_appDbContextFactory);
         _workspaceService = new WorkspaceService(workspaceRepository,null!, null!, _appDbContextFactory.CreateDbContext(), null!);
-        _reelService = new ReelService(reelRepository, reelValidator, _workspaceService);
+        _reelService = new ReelService(reelRepository, null!, reelValidator, _workspaceService);
     }
 
     [Fact]

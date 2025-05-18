@@ -131,6 +131,7 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository, IInviteT
         }
         
         var userToInvite = dbContext.Users.SingleOrDefault(u => u.Email == email);
+        var inviter = dbContext.Users.SingleOrDefault(u => u.Id == userId);
 
         if (userToInvite is null)
         {
@@ -143,7 +144,7 @@ public class WorkspaceService(IWorkspaceRepository workspaceRepository, IInviteT
         var baseUrl = $"{request?.Scheme}://{request?.Host}";
         var link = $"{baseUrl}/api/v1/users/me/workspaces/accept/{token}";
         
-        await emailService.SendEmailInviteAsync(email, userToInvite.Username, link);
+        await emailService.SendEmailInviteAsync(email, userToInvite.Username, link, inviter.Username);
         
         return Unit.Default;
     }

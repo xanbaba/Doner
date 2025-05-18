@@ -19,7 +19,7 @@ public class EmailService(IOptions<MailjetSettings> config) : IEmailService
 {
     private readonly MailjetSettings _settings = config.Value;
 
-    public async Task SendEmailInviteAsync(string toEmail, string username, string link)
+    public async Task SendEmailInviteAsync(string toEmail, string username, string link, string inviterName)
     {
         var client = new MailjetClient(_settings.ApiKey, _settings.ApiSecret);
 
@@ -43,7 +43,7 @@ public class EmailService(IOptions<MailjetSettings> config) : IEmailService
                             }
                         }
                     },
-                    { "Subject", "You're invited to join a workspace" },
+                    { "Subject", $"{inviterName} invited you to join a workspace" },
                     { "TextPart", $"Dear {username},\n\nYou've been invited to join a workspace.\n{link}" },
                     { "HTMLPart", $"<p>Dear {username},</p><p>You've been invited to join a workspace.</p><p><a href='{link}'>Click here to accept</a></p>" }
                 }

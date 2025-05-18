@@ -2,5 +2,5 @@
 
 public interface IEmailService
 {
-    public Task SendEmailInviteAsync(string toEmail, string username, string link);
+    public Task SendEmailInviteAsync(string toEmail, string username, string link, string inviterName);
 }
